@@ -8,7 +8,7 @@ import uglify from "gulp-uglify";
 import webpackConfig from "./webpack.config.babel";
 
 gulp.task('build', () => {
-	return gulp.src( "src/index.js" )
+	return gulp.src( 'src/index.js' )
 		.pipe( webpack( webpackConfig ) )
 		.pipe( gulp.dest( "./lib" ) )
 		.pipe( sourcemaps.init( { loadMaps: true } ) )

@@ -1,0 +1,6 @@
+src/
+.*
+gulpfile*.js
+webpack*.js
+lib/index.js
+lib/StringBuffer.js
