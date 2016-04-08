@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Twitter bootstrap context menu -- demo</title>
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <script src="../jquery/jquery-1.8.2.min.js"></script>
+        <script src="../js/bootstrap.contextmenu.js"></script>
+    </head>
+    <style>
+        #id1,#id0 {
+            width: 96%;
+            height: 300px;
+            background: #EEE;
+            font-weight: bold;
+            padding: 5px;
+            border: 1px solid #CCC;
+        }
+    </style>
+    <body  bgcolor="white">
+        <div>
+            <div style="padding:10px;">
+                <center><h3>Twitter bootstrap context menu demo</h3></center>
+                <div><h2>1. basic</h2></div>
+                <p> This is a basic demo of the <b>Twitter bootstrap context menu</b> plugin, click link bellow to enable/disable View, Sort by and Refresh menu items</p]>
+                <div id="id0">Right click here</div>
+                <p>
+                    <a href="#" onclick="$('#id0').contextMenu('disable','view');$('#id0').contextMenu('disable','sortby');$('#id0').contextMenu('disable','refresh'); return false;">
+                        Disable View, Sort by and Refresh menu items
+                    </a>
+                    &nbsp;&nbsp;&nbsp;
+                    <a href="#" onclick="$('#id0').contextMenu('enable','view');$('#id0').contextMenu('enable','sortby');$('#id0').contextMenu('enable','refresh'); return false;">
+                        Enable View, Sort by and Refresh menu items
+                    </a> 
+                    
+                </p>
+                <br />
+                <br />
+                <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+                <div><h2>2. Width sub-menu</h2></div>
+                <p> This is a demo of the <b>Twitter bootstrap context menu</b> plugin with sub-menu, click link bellow to enable/disable View, Sort by&gt;Name and Refresh menu items</p]>
+                <div id="id1">Right click here</div>
+                <p>
+                    <a href="#" onclick="$('#id1').contextMenu('disable','view');$('#id1').contextMenu('disable','sortby>name');$('#id1').contextMenu('disable','refresh'); return false;">
+                        Disable View, Sort by > name and Refresh menu items
+                    </a>&nbsp;&nbsp;&nbsp;
+                    <a href="#" onclick="$('#id1').contextMenu('enable','view');$('#id1').contextMenu('enable','sortby>name');$('#id1').contextMenu('enable','refresh'); return false;">
+                        Enable View, Sort by > name and Refresh menu items
+                    </a> 
+                    
+                </p>
+                <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+                <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+            </div>
+            
+        </div>
+    </body>
+    <script>
+        var callback = function(target,element){
+            $(target).html('<span style="color:red">' +$(element).html() +'</span> menu is clicked, Target id: '+ $(target).attr('id'));
+        };
+        var menu = {};
+	
+        menu['back'] 			= {icon:'icon-arrow-left',text:'Back',click:callback};
+        menu['forward'] 		= {icon:'icon-arrow-right',text:'Forward',click:callback};
+	
+        menu['view'] 			= {text:'View',click:callback};
+        menu['sortby'] 			= {text:'Sort by',click:callback};
+        menu['refresh'] 		= {icon:'icon-refresh',text:'Refresh',click:callback};
+        menu['notepad'] 		= {text:'Notepad++',click:callback};
+	
+        menu['s1'] 			= '---';
+        menu['copy'] 			= {text:'Copy',click:callback};
+        menu['paste'] 			= {disabled:true,text:'Paste',click:callback};
+        menu['paste_shortcut']          = {disabled:true,text:'Paste shortcut',click:callback};
+	
+        menu['s2'] 			= '---';
+        menu['create_shortcut']         = {text:'Create shortcut',click:callback};
+        menu['rename']			= {text:'Rename',click:callback};
+        menu['del']			= {text:'Delete',click:callback};
+
+        menu['s3'] 			= '---';
+        menu['properties']		= {text:'Properties',click:callback};
+        
+        //$('#id0').data('mc',1);
+        $('#id0').contextMenu(menu);
+        
+
+
+
+        var menu = {};
+	
+        menu['back'] 			= {icon:'icon-arrow-left',text:'Back',click:callback};
+        menu['forward'] 		= {icon:'icon-arrow-right',text:'Forward',click:callback};
+	
+        menu['view'] 			= {text:'View',click:callback};
+        menu['sortby'] 			= {text:'Sort by',click:callback,
+            children:{
+                name:{text:'Name',click:callback},
+                size:{text:'Size',click:callback},
+                itemtype:{text:'Item type',click:callback},
+                datemodified:{text:'Date modified',click:callback},
+                s1:'---',
+                Ascending:{text:'Ascending',click:callback},
+                Descending:{text:'Descending',click:callback},
+                s2:'---',
+                More:{text:'More',click:callback,
+                    children:{
+                        other1:{text:'Other 1',click:callback},
+                        other2:{text:'Other 2',click:callback},
+                        other3:{text:'Other 3',click:callback},
+                        sx:'---',
+                        other4:{text:'Other 4',click:callback}
+                    }
+                }
+            }
+        };
+        menu.refresh 			= {icon:'icon-refresh',text:'Refresh',click:callback};
+        menu.notepad 			= {text:'Notepad++',click:callback};
+	
+        menu.s1 			= '---';
+        menu.copy 			= {text:'Copy',click:callback};
+        menu.paste 			= {disabled:true,text:'Paste',click:callback};
+        menu.paste_shortcut		= {disabled:true,text:'Paste shortcut',click:callback};
+	
+        menu.s2 			= '---';
+        menu.create_shortcut            = {text:'Create shortcut',click:callback};
+        menu.rename			= {text:'Rename',click:callback};
+        menu.del			= {text:'Delete',click:callback};
+
+        menu.s3 			= '---';
+        menu.properties		 	= {text:'Properties',click:callback};
+	
+        $('#id1').contextMenu(menu);
+        $('#id1').contextMenu('beforeDisplay',function(target){ console.log(target.html()) });
+    </script>
+</html>

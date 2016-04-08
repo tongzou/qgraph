@@ -1,7 +1,11 @@
 import _ from "lodash";
 
-import StringBuffer from "./StringBuffer";
+import DomUtils from "./util/DomUtils";
+import StringBuffer from "./util/StringBuffer";
+import EventDispatcher from "./event/EventDispatcher";
 
 export default {
-	StringBuffer
+	DomUtils,
+	StringBuffer,
+	EventDispatcher
 };

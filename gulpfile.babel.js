@@ -20,7 +20,7 @@ gulp.task('build', () => {
 				/*eslint-enable */
 			}
 		} ) )
-		.pipe( rename( "qd-utils.min.js" ) )
+		.pipe( rename( "qgraph.min.js" ) )
 		.pipe( sourcemaps.write( "./" ) )
 		.pipe( gulp.dest( "lib/" ) );
 });

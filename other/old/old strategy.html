@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ <title>Strategy Map</title>
+
+ <link rel="stylesheet" type="text/css" href="../jsVisualLibrary/lib/jquery-ui.min.css" />
+ <link rel="stylesheet" type="text/css" href="../jsVisualLibrary/lib/jQuery-themes/start/theme.css" />
+
+
+ <script type="text/javascript" src="../jsVisualLibrary/lib/jquery-1.11.1.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/jquery-ui.min.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/lodash.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/underscore.string.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/jss.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/d3-master/d3.js"></script>
+
+ <!--[if IE]>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/SVG.toDataURL/base64.js"></script>
+ <![endif]-->
+ <script type="text/javascript" src="../jsVisualLibrary/lib/canvg/rgbcolor.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/canvg/StackBlur.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/canvg/canvg.js"></script>
+ <script type="text/javascript" src="../jsVisualLibrary/lib/SVG.toDataURL/svg_todataurl.js"></script>
+
+ <script  type="text/javascript" src="../jsVisualLibrary/src/gfw-graph.js"></script>
+ <script  type="text/javascript" src="../jsVisualLibrary/src/gfw-viewer.js"></script>
+ <script  type="text/javascript" src="src/smviewer.js"></script>
+</head>
+<body>
+<input type="button" value="Test Update" onclick="testUpdate()"/>
+<input type="button" value="Toggle Zoom" onclick="toggleZoom()"/>
+<input type="button" value="Test Image Capture" onclick="testImageCapture()"/>
+<input type="button" value="Test Dialog" onclick="testDialog()"/>
+<input type="button" value="Start Viewer" onclick="startViewer()"/>
+<input type="button" value="Load Model" onclick ="loadModel()"/>
+<input type="button" value="Destroy Viewer" onclick="destroyViewer()"/>
+
+<script>
+var pega = {};
+pega.u = {};
+var sizerConfig = {jsClass: gfw.GreedySizer, xEnable:false, yOffset:10};
+var debugLog = true;
+var toolbarConfig = '';
+var strPageName = "";
+</script>
+
+<script type="text/javascript">
+	var edgeTypes = [
+		{
+			name: "default",
+			jsClass: gfw.Edge,
+			className: 'defaultEdge',
+			visible: true, localAction: "pzPropertyPanelModal"
+		}
+
+  ,
+  {
+ name: 'Inheritance',
+ canCreate: 'true', canCreateName: 'Connector',  canCreateTitle: 'Drag the Inheritance shape onto the canvas',
+ selectable: true,
+ className: 'defaultEdge',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true'},
+ contextMenu_navRule: 'pyStrategyMenu'
+},
+{
+ name: 'Reference',
+ className: 'ReferenceEdge',
+ selectable: false
+}
+
+
+	];
+
+	var vertexTypes = [
+		{
+			name: 'default',
+			jsClass: strategy.Vertex,
+			showTooltip: true, foldable: false, isWrapping: true,
+			editable: false,  selectable: false,  draggable: false, canReorderChildren: false, localAction: "pzPropertyPanelModal"
+		},
+		{
+			name: "Error",
+			className: "typeError",
+			shapeConfig: {
+				shape: "rectangle",
+				perimeter: "rectanglePerimeter"
+			},
+			labelConfig: {
+				labelHorizontalPos: 0.5, labelVerticalPos: 0.5, labelWidth: "100%", labelHeight: "100%", labelOffsetX: "0", labelOffsetY: "0"
+			},
+			viewHTML: '<DIV id="!id" unselectable="on" style="position: absolute;-moz-user-select: none;"><DIV class="processTable"><TABLE cellSpacing="0" cellPadding="0"><TBODY><TR><TD align="center"><SPAN class="scrumNodeText" id="textSpan"></SPAN></TD></TR></TBODY></TABLE></DIV><DIV class="scrumChildIndicator" style="position:absolute;visibility:hidden"></DIV></DIV>'
+		}
+                  ,
+		{
+ name: 'SegmentFilter',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeSegmentFilter',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Financial',
+ defaultName: 'Financial Calculation',  canCreateTitle: 'Drag the Financial shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeFinancialCalculation',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'EmbeddedPage',
+ canCreate: 'true', canCreateName: 'Data Import',  canCreateGroup: '2',  defaultName: 'Data Import',  canCreateIconClass: 'iconDataImport',  canCreateOrder: '13',  canCreateTitle: 'Drag the EmbeddedPage shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableOut: true,
+ className: 'typeDataImport',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Adaptive',
+ defaultName: 'Adaptive Model',  canCreateTitle: 'Drag the Adaptive shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeAdaptiveModel',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'DataJoin',
+ canCreate: 'true', canCreateName: 'Data Join',  canCreateGroup: '3',  defaultName: 'Data Join',  canCreateIconClass: 'iconStrategySet',  canCreateOrder: '22',  canCreateTitle: 'Drag the DataJoin shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeDataJoin',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Challenger',
+ defaultName: 'Champion Challenger',  canCreateTitle: 'Drag the Challenger shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeChampionChallenger',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Switch',
+ canCreate: 'true', canCreateName: 'Switch',  canCreateGroup: '5',  defaultName: 'Switch',  canCreateIconClass: 'iconSwitch',  canCreateOrder: '41',  canCreateTitle: 'Drag the Switch shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeSwitch',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Aggregation',
+ defaultName: 'Group By',  canCreateTitle: 'Drag the Aggregation shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeGroupBy',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'ExpressionFilter',
+ canCreate: 'true', canCreateName: 'Filter',  canCreateGroup: '4',  defaultName: 'Filter',  canCreateIconClass: 'iconFilter',  canCreateOrder: '32',  canCreateTitle: 'Drag the ExpressionFilter shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeFilter',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Proposition',
+ defaultName: 'Proposition Data',  canCreateTitle: 'Drag the Proposition shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typePropositionData',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'StrategySet',
+ defaultName: 'Set Property',  canCreateTitle: 'Drag the StrategySet shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeSetProperty',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ onSelect: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'root',
+ connectableIn: true, connectableOut: true,
+ contextMenu_navRule: 'pyRootMenu'
+},
+{
+ name: 'Predictive Model',
+ defaultName: 'Predictive Model',  canCreateTitle: 'Drag the Predictive Model shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typePredictiveModel',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'PrioritizationRule',
+ defaultName: 'Prioritize',  canCreateTitle: 'Drag the PrioritizationRule shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typePrioritization',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Scorecard',
+ defaultName: 'Scorecard Model',  canCreateTitle: 'Drag the Scorecard shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeScorecardModel',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Strategy',
+ canCreate: 'true', canCreateName: 'Sub Strategy',  canCreateGroup: '2',  defaultName: 'Sub Strategy',  canCreateIconClass: 'iconStrategyReference',  canCreateOrder: '11',  canCreateTitle: 'Drag the Strategy shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeSubStrategy',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Decision Table',
+ canCreate: 'true', canCreateName: 'Decision Table',  canCreateGroup: '1',  defaultName: 'Decision Table',  canCreateIconClass: 'iconDecisionTable',  canCreateOrder: '0',  canCreateTitle: 'Drag the Decision Table shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeDecisionTable',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Map Value',
+ defaultName: 'Map Value',  canCreateTitle: 'Drag the Map Value shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeMapValue',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Decision Tree',
+ canCreate: 'true', canCreateName: 'Decision Tree',  canCreateGroup: '1',  defaultName: 'Decision Tree',  canCreateIconClass: 'iconDecisionTable',  canCreateOrder: '1',  canCreateTitle: 'Drag the Decision Tree shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeDecisionTree',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Annotation',
+ canCreate: 'true', canCreateName: 'Annotation',  canCreateGroup: '7',  defaultName: '[Enter Text Here]',  canCreateIconClass: 'iconAnnotation',  canCreateOrder: '61',  canCreateTitle: 'Drag the Annotation shape onto the canvas',
+ selectable: true, draggable: true, editable: true, resizable: true,
+ className: 'typeAnnotation',
+ contextMenu_navRule: 'pyMenuDM'
+},
+{
+ name: 'ContactPolicy',
+ canCreate: 'false', canCreateName: 'Contact Policy',  selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typePolicy',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'InteractionHistory',
+ defaultName: 'Interaction History',  canCreateTitle: 'Drag the InteractionHistory shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableOut: true,
+ className: 'typeInteractionHistory',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Output',
+ draggable: true, connectableIn: true,
+ className: 'typeOutput',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Geofence',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeGeofence',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Split',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeSplit',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Exclusion',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeExclusion',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'External Input',
+ draggable: true, connectableOut: true,
+ className: 'typeInput',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'DecisionParameters',
+ defaultName: 'Decision Parameters',  canCreateTitle: 'Drag the DecisionParameters shape onto the canvas',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeDecisionParameters',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+},
+{
+ name: 'Iteration',
+ selectable: true, draggable: true, editable: true, connectableIn: true, connectableOut: true,
+ className: 'typeIteration',
+ onDblClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'true', args:{actionSection:'pyPMModalTemplate'}},
+ actionSection:'pyPMModalTemplate',
+ contextMenu_navRule: 'pyMenu'
+}
+
+	];
+
+	var viewerConfig =
+	{
+		id:'smviewer',
+		jsClass: strategy.Viewer,
+		embedded: false,
+		sizer: sizerConfig/*{jsClass: 'pega.mxgraphviewer.Sizer', config: {resizeEl: "pmviewer"}}*/,
+		serverAPI: {
+			propertyMap:{
+				label: "pyMOName",
+				x: "pyCoordX",
+				y: "pyCoordY",
+				width: "pyWidth",
+				height: "pyHeight",
+                source: "pyFrom",
+                target: "pyTo",
+                points: "pyConnectorPoints"
+			}
+		},
+		builder: {
+			errorType: "Error",
+			childAsLink: false
+		},
+		graphConfig: {
+			className: "graph",
+			multigraph: false,
+			singleSelect: false,
+			draggable: false,
+			mode: 3,
+			lockColor: "#e7e7e7",
+			maskOpacity: 0,
+			hideOutline: false,
+			gridEnabled: true,
+			gridSize: 30,
+			//showGrid: false,
+			guidesEnabled: true,
+			defaultClickMode: "pan",
+			connectorStyle: 'bigEdgeArrows',
+			allowDanglingEdges: false,
+			vertexTypes: vertexTypes,
+			edgeTypes: edgeTypes,
+			layout: {
+				jsClass: strategy.Layout,
+				fitGraph: false
+			},
+			renderer: {
+				//jsClass: gfw.SVGRenderer
+			}
+		},
+		toolbars: []
+	};
+
+
+var model =
+{
+settings: {pasteKey:'Strategy', pasteBufferKey:'Strategy'},
+nodes: [
+	{type:'root', label:'simpleSM', id:'Rule-Decision-Strategy'},
+	{type:'ExpressionFilter', label:'[Filter]', id:'ExpressionFilter1', tooltip:'Not configured', pathKey:'RH_1.pyModelProcess.pyShapes(ExpressionFilter1)', indicators: [{className: 'Summary', label: 'Not configured blah blah'},{className: 'Filter'}], x:.24, y:.24},
+	//{type:'External Input', label:'External Input', id:'ExternalInput1', pathKey:'RH_1.pyModelProcess.pyShapes(ExternalInput1)', x:1.6, y:.24},
+	{type:'Output', label:'Results', id:'Output', pathKey:'RH_1.pyModelProcess.pyShapes(Output)', x:4, y: 1.6, indicators: [{ classname: 'Output', onClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'false', args:{actionSection:'pyPMModalTemplate'}}}]}//,
+	//{type:'DataJoin', label:'[Data Join]', id:'DataJoin1', tooltip:'Joins ', pathKey:'RH_1.pyModelProcess.pyShapes(DataJoin1)', indicators: [{className: 'Summary', label: 'Joins '},{className: 'DataJoin'}], x:.24, y:1.6},
+	//{type:'Strategy', label:'[Sub Strategy]', id:'Strategy1', tooltip:'Imports  from ', pathKey:'RH_1.pyModelProcess.pyShapes(Strategy1)', pzInsKey:'', pyClassName:'null', indicators: [{className: 'Summary', label: 'Imports  from '},{className: 'SubStrategy'},{className: 'NoIncomingArrow'}], x:1.6, y:1.6, pxObjClass:'Data-MO-DSM-DataImport'}
+],
+edges: [
+	{from: 'ExpressionFilter1', to:'Output',type:'Inheritance', label:'hello', id:'Transition1', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition1)'}/*,
+	{from: 'ExternalInput1', to:'Output',type:'Inheritance', label:'', id:'Transition', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition)'}*/
+]
+};
+
+var model2 =
+{
+settings: {pasteKey:'Strategy', pasteBufferKey:'Strategy'},
+nodes: [
+	{type:'root', label:'NextBestOffer', id:'Rule-Decision-Strategy'},
+	{type:'StrategySet', label:'Strategy Set Priority', id:'StrategySet1', tooltip:'Sets .Priority using MinAndMaxPriority.MinPriority, MinAndMaxPriority.MaxPriority and .pyWeight', pathKey:'RH_1.pyModelProcess.pyShapes(StrategySet1)', indicators: [{className: 'Summary', label: 'Sets .Priority using MinAndMaxPriority.MinPriority, MinAndMax...'},{className: 'SetProperty'}], x:9.36, y:0.576},
+	{type:'StrategySet', label:'Set GroupDID for Top 3 Offers', id:'StrategySet2', tooltip:'Sets .GroupDID', pathKey:'RH_1.pyModelProcess.pyShapes(StrategySet2)', indicators: [{className: 'Summary', label: 'Sets .GroupDID'},{className: 'SetProperty'},{className: 'Error', tooltip: '<div  class=\'sectionDivStyle\' id=\'RULE_KEY\' node_type=\'MAIN_RULE\' node_name=\'pzDrillDown\' version=\'1\' objclass=\'Rule-HTML-Section\'  pyclassname=\'Data-MO-Container-SplitJoin\'  expandRL=\'\' uniqueID=\'SID1409960668667\' ><table   section_index=\'1\'  cellpadding=\'0\' cellspacing=\'0\' ID=\'\'>       <tr><td     class=\'dataLabelWrite\' style=\'height:31px;padding-top:5px\'><nobr><label   >Click to navigate to one of the <br>subprocesses in this split-join:</label></nobr></td>       </tr>       </table>  <div  class = "repeatContainer" section_index=\'2\' > <table class= \' repeatReadWrite repeatReadWriteRowColRepeat\' style=\'\' PL_PROP=\'.pySubProcesses\' summary=\'\' ID=\'\' bReadOnly=\'false\'> <tr><th  tabIndex="0"  role="columnheader"     scope=\'col\' class=\'dataLabelRead\' pyCellType = \'static\'   style=\'width:138px;height:1px\'></th> </tr>      <tr hPref = \'$PRH_1$ppyModelProcess$ppyShapes$gSplitJoin2$ppySubProcesses$l1\' PL_INDEX = \'1\' >     <th  tabIndex="0"  role="columnheader"    class=\' oddRow  \' NAME=\'BASE_REF\' BASE_REF=\'RH_1.pyModelProcess.pyShapes(SplitJoin2).pySubProcesses(1)\' style=\'height:22px;width:138px;text-align:left; height:20px\'><span onclick=ViewerManager.executeAction(\'drillDown\',\'SimpleFlow1.SubProcess2\') style="cursor:pointer; text-decoration:underline;">SimpleFlow2</span></th>  </tr>    </table> </div><!--[if IE 6]><style>div.rowrepeat div#gridBody_right table.gridTable tr.cellCont TD, div.rowrepeat div#gridBody_right table.gridTable tr.cellCont TH,div.rowrepeat div#PEGA_GRID_CONTENT table.gridTable { border: 0px solid white !important;}</style><![endif]--> </div>'}], x:16.799999999999997, y:0.576},
+	{type:'StrategySet', label:'NBO Relevant', id:'StrategySet3', tooltip:'Sets .ActionID, .Relevant, .NBAMessage and .NeedAssessment using .CountOffers', pathKey:'RH_1.pyModelProcess.pyShapes(StrategySet3)', indicators: [{className: 'Summary', label: 'Sets .ActionID, .Relevant, .NBAMessage and .NeedAssessment us...'},{className: 'SetProperty'}], x:16.799999999999997, y:1.728},
+	{type:'Output', label:'Results', id:'Output', pathKey:'RH_1.pyModelProcess.pyShapes(Output)', indicators: [{ classname: 'Output', onClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'false', args:{actionSection:'pyPMModalTemplate'}}}], x:18.799999999999997, y:1.0260000000000002},
+	{type:'Aggregation', label:'Aggregation', id:'Aggregation1', tooltip:'Sets .Priority and .SmoothedPropensity using .SmoothedPropensity and .Priority', pathKey:'RH_1.pyModelProcess.pyShapes(Aggregation1)', indicators: [{className: 'Summary', label: 'Sets .Priority and .SmoothedPropensity using .SmoothedPropens...'},{className: 'GroupBy'}], x:3.5999999999999996, y:0.576},
+	{type:'Switch', label:'Switch members/member', id:'Switch1', tooltip:'Switches using no properties', pathKey:'RH_1.pyModelProcess.pyShapes(Switch1)', indicators: [{className: 'Summary', label: 'Switches using no properties'},{className: 'Switch'}], x:5.04, y:0.576},
+	{type:'NamedPage', label:'TestMode', id:'EmbeddedPage1', tooltip:'Sets .TestModeOn using .TEST_MODE from ControlParameters', pathKey:'RH_1.pyModelProcess.pyShapes(EmbeddedPage1)', indicators: [{className: 'Summary', label: 'Sets .TestModeOn using .TEST_MODE from ControlParameters'},{className: 'dataImport'},{className: 'NoIncomingArrow'}], x:6.84, y:1.728},
+	{type:'ExpressionFilter', label:'Eligible And Relevant Acount level All Offers', id:'ExpressionFilter1', tooltip:'Filters on @and&#40;.Eligible,.Relevant&#41;', pathKey:'RH_1.pyModelProcess.pyShapes(ExpressionFilter1)', indicators: [{className: 'Summary', label: 'Filters on @and(.Eligible,.Relevant)'},{className: 'Filter'}], x:2.16, y:0.576},
+	{type:'ExpressionFilter', label:'Eligible And Relevant', id:'ExpressionFilter2', tooltip:'Filters on @and&#40;.Eligible,.Relevant&#41;', pathKey:'RH_1.pyModelProcess.pyShapes(ExpressionFilter2)', indicators: [{className: 'Summary', label: 'Filters on @and(.Eligible,.Relevant)'},{className: 'Filter'}], x:3.5999999999999996, y:1.728},
+	{type:'ExpressionFilter', label:'Relevant All Offers', id:'ExpressionFilter3', tooltip:'Filters on @if&#40;TestMode.TestModeOn, true, .AllRelevant&#41;', pathKey:'RH_1.pyModelProcess.pyShapes(ExpressionFilter3)', indicators: [{className: 'Summary', label: 'Filters on @if(TestMode.TestModeOn, true, .AllRelevant)'},{className: 'Filter'}], x:6.84, y:0.576},
+	{type:'Aggregation', label:'Count Offers', id:'Aggregation3', tooltip:'Sets .CountOffers using .pyName', pathKey:'RH_1.pyModelProcess.pyShapes(Aggregation3)', indicators: [{className: 'Summary', label: 'Sets .CountOffers using .pyName'},{className: 'GroupBy'}], x:15.36, y:1.728},
+	{type:'Aggregation', label:'MinAndMaxPriority', id:'Aggregation2', tooltip:'Sets .MaxPriority and .MinPriority using .Priority', pathKey:'RH_1.pyModelProcess.pyShapes(Aggregation2)', indicators: [{className: 'Summary', label: 'Sets .MaxPriority and .MinPriority using .Priority'},{className: 'GroupBy'}], x:9.36, y:2.016},
+	{type:'PrioritizationRule', label:'Prioritization By Priority', id:'PrioritizationRule3', tooltip:'Select All, ordered by .SmoothedPropensity, descending', pathKey:'RH_1.pyModelProcess.pyShapes(PrioritizationRule3)', indicators: [{className: 'Summary', label: 'Select All, ordered by .SmoothedPropensity, descending'},{className: 'Prioritize'}], x:11.52, y:0.576},
+	{type:'PrioritizationRule', label:'Prioritization All', id:'PrioritizationRule1', tooltip:'Select All, ordered by .Priority, descending', pathKey:'RH_1.pyModelProcess.pyShapes(PrioritizationRule1)', indicators: [{className: 'Summary', label: 'Select All, ordered by .Priority, descending'},{className: 'Prioritize'}], x:13.68, y:0.576},
+	{type:'PrioritizationRule', label:'Prioritization Top 3', id:'PrioritizationRule2', tooltip:'Select Top 3, ordered by .Priority, descending', pathKey:'RH_1.pyModelProcess.pyShapes(PrioritizationRule2)', indicators: [{className: 'Summary', label: 'Select Top 3, ordered by .Priority, descending'},{className: 'Prioritize'}], x:15.36, y:0.576},
+	{type:'Strategy', label:'AllOffers for an members', id:'Strategy1', tooltip:'Imports AllOffers from AllOffers', pathKey:'RH_1.pyModelProcess.pyShapes(Strategy1)', pzInsKey:'', pyClassName:'null', indicators: [{className: 'Summary', label: 'Imports AllOffers from AllOffers'},{className: 'SubStrategy'},{className: 'NoIncomingArrow'}], x:0.72, y:0.576, pxObjClass:'Data-MO-DSM-DataImport'},
+	{type:'Strategy', label:'All Offers for member', id:'Strategy2', tooltip:'Imports AllOffers from AllOffers', pathKey:'RH_1.pyModelProcess.pyShapes(Strategy2)', pzInsKey:'', pyClassName:'null', indicators: [{className: 'Summary', label: 'Imports AllOffers from AllOffers'},{className: 'SubStrategy'},{className: 'NoIncomingArrow'}], x:2.16, y:1.728, pxObjClass:'Data-MO-DSM-DataImport'}
+],
+edges: [
+	{from: 'Strategy1', to:'Output',type:'Inheritance', label:'', id:'Transition4', tooltip:'Includes All', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition4)'},
+	{from: 'PrioritizationRule1', to:'Output',type:'Inheritance', label:' ', id:'Transition3', tooltip:'Includes All', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition3)'},
+	{from: 'StrategySet3', to:'Output',type:'Inheritance', label:'', id:'Transition2', tooltip:'Includes All', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition2)'},
+	{from: 'PrioritizationRule1', to:'PrioritizationRule2',type:'Inheritance', label:'', id:'Inheritance_from_PrioritizationRule1_to_PrioritizationRule2_1363945570865', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_PrioritizationRule1_to_PrioritizationRule2_1363945570865)'},
+	{from: 'StrategySet2', to:'Output',type:'Inheritance', label:'', id:'Transition1', tooltip:'Includes All', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition1)'},
+	{from: 'Aggregation2', to:'StrategySet1',type:'Reference', label:'', id:'Reference_from_Aggregation2_to_StrategySet1_1363945570842', pathKey:'RH_1.pyModelProcess.pyConnectors(Reference_from_Aggregation2_to_StrategySet1_1363945570842)'},
+	{from: 'Aggregation3', to:'StrategySet3',type:'Inheritance', label:'', id:'Inheritance_from_Aggregation3_to_StrategySet3_1363945570845', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_Aggregation3_to_StrategySet3_1363945570845)'},
+	{from: 'ExpressionFilter2', to:'Switch1',type:'Inheritance', label:'', id:'Inheritance_from_ExpressionFilter2_to_Switch1_1363945570848', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_ExpressionFilter2_to_Switch1_1363945570848)'},
+	{from: 'Strategy2', to:'ExpressionFilter2',type:'Inheritance', label:'', id:'Inheritance_from_Strategy2_to_ExpressionFilter2_1363945570852', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_Strategy2_to_ExpressionFilter2_1363945570852)'},
+	{from: 'Strategy1', to:'ExpressionFilter1',type:'Inheritance', label:'', id:'Inheritance_from_Strategy1_to_ExpressionFilter1_1363945570850', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_Strategy1_to_ExpressionFilter1_1363945570850)'},
+	{from: 'Aggregation1', to:'Switch1',type:'Inheritance', label:'', id:'Inheritance_from_Aggregation1_to_Switch1_1363945570849', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_Aggregation1_to_Switch1_1363945570849)'},
+	{from: 'PrioritizationRule2', to:'StrategySet2',type:'Inheritance', label:'', id:'Inheritance_from_PrioritizationRule2_to_StrategySet2_1363945570844', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_PrioritizationRule2_to_StrategySet2_1363945570844)'},
+	{from: 'ExpressionFilter3', to:'Aggregation2',type:'Inheritance', label:' ', id:'Inheritance_from_ExpressionFilter3_to_Aggregation2_1363945570860', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_ExpressionFilter3_to_Aggregation2_1363945570860)'},
+	{from: 'ExpressionFilter1', to:'Aggregation1',type:'Inheritance', label:'', id:'Inheritance_from_ExpressionFilter1_to_Aggregation1_1363945570847', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_ExpressionFilter1_to_Aggregation1_1363945570847)'},
+	{from: 'Switch1', to:'ExpressionFilter3',type:'Inheritance', label:'', id:'Inheritance_from_Switch1_to_ExpressionFilter3_1363945570855', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_Switch1_to_ExpressionFilter3_1363945570855)'},
+	{from: 'PrioritizationRule2', to:'Aggregation3',type:'Inheritance', label:'', id:'Inheritance_from_PrioritizationRule2_to_Aggregation3_1363945570858', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_PrioritizationRule2_to_Aggregation3_1363945570858)'},
+	{from: 'StrategySet1', to:'PrioritizationRule3',type:'Inheritance', label:'', id:'Inheritance_from_StrategySet1_to_PrioritizationRule3_1363945570862', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_StrategySet1_to_PrioritizationRule3_1363945570862)'},
+	{from: 'ExpressionFilter3', to:'StrategySet1',type:'Inheritance', label:'', id:'Inheritance_from_ExpressionFilter3_to_StrategySet1_1363945570841', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_ExpressionFilter3_to_StrategySet1_1363945570841)'},
+	{from: 'PrioritizationRule3', to:'PrioritizationRule1',type:'Inheritance', label:'', id:'Inheritance_from_PrioritizationRule3_to_PrioritizationRule1_1363945570864', pathKey:'RH_1.pyModelProcess.pyConnectors(Inheritance_from_PrioritizationRule3_to_PrioritizationRule1_1363945570864)'},
+	{from: 'EmbeddedPage1', to:'ExpressionFilter3',type:'Reference', label:'', id:'Reference_from_EmbeddedPage1_to_ExpressionFilter3_1363945570856', pathKey:'RH_1.pyModelProcess.pyConnectors(Reference_from_EmbeddedPage1_to_ExpressionFilter3_1363945570856)'}
+]
+};
+
+var model3 =
+{
+settings: {pasteKey:'Strategy', pasteBufferKey:'Strategy'},
+nodes: [
+	{type:'root', label:'All Components', id:'Rule-Decision-Strategy'},
+	{type:'StrategySet', label:'[Set Property]', id:'StrategySet1', tooltip:'Does not set any properties yet', pathKey:'RH_1.pyModelProcess.pyShapes(StrategySet1)', indicators: [{className: 'Summary', label: 'Does not set any properties yet'},{className: 'SetProperty'}], x:-4.28, y:-0.152},
+	{type:'Exclusion', label:'[Exclusion]', id:'Exclusion1', tooltip:'Excludes Results', pathKey:'RH_1.pyModelProcess.pyShapes(Exclusion1)', indicators: [{className: 'Summary', label: 'Excludes Results'},{className: 'Exclusion'}], x:-6.968, y:0.528},
+	{type:'Proposition', label:'[Proposition Data]', id:'Proposition1', tooltip:'Imports all from ,  and uses interaction history', pathKey:'RH_1.pyModelProcess.pyShapes(Proposition1)', indicators: [{className: 'Summary', label: 'Imports all from ,  and uses interaction history'},{className: 'PropositionData'}], x:-4.336, y:-1.448},
+	{type:'DecisionParameters', label:'[Decision Parameters]', id:'DecisionParameters1', tooltip:'Using ', pathKey:'RH_1.pyModelProcess.pyShapes(DecisionParameters1)', pzInsKey:'', indicators: [{className: 'Summary', label: 'Using '},{className: 'DecisionParameters'}], x:-5.64, y:-0.16},
+	{type:'Output', label:'Results', id:'Output', pathKey:'RH_1.pyModelProcess.pyShapes(Output)', indicators: [{ classname: 'Output', onClick: {type:'processAction', method: 'pzPropertyPanelModal', propPanel: 'false', args:{actionSection:'pyPMModalTemplate'}}}], x:1.376, y:-0.816},
+	{type:'Aggregation', label:'[Group By]', id:'Aggregation1', tooltip:'Not configured', pathKey:'RH_1.pyModelProcess.pyShapes(Aggregation1)', indicators: [{className: 'Summary', label: 'Not configured'},{className: 'GroupBy'}], x:-2.952, y:0.512},
+	{type:'DataJoin', label:'[Data Join]', id:'DataJoin1', tooltip:'Joins ', pathKey:'RH_1.pyModelProcess.pyShapes(DataJoin1)', indicators: [{className: 'Summary', label: 'Joins '},{className: 'DataJoin'}], x:-6.96, y:-0.16},
+	{type:'Decision Tree', label:'[Decision Tree]', id:'DecisionTree1', tooltip:'Uses ', pathKey:'RH_1.pyModelProcess.pyShapes(DecisionTree1)', pzInsKey:'', pyClassName:'DMOrg-GFW-Work', indicators: [{className: 'Summary', label: 'Uses '},{className: 'DecisionTree'}], x:-5.648, y:-0.824, pxObjClass:'Data-MO-DSM-Reference'},
+	{type:'Switch', label:'[Switch]', id:'Switch1', tooltip:'Switches using no properties', pathKey:'RH_1.pyModelProcess.pyShapes(Switch1)', indicators: [{className: 'Summary', label: 'Switches using no properties'},{className: 'Switch'}], x:-4.28, y:0.512},
+	{type:'EmbeddedPage', label:'[Data Import]', id:'EmbeddedPage1', tooltip:'Imports from ', pathKey:'RH_1.pyModelProcess.pyShapes(EmbeddedPage1)', indicators: [{className: 'Summary', label: 'Imports from '},{className: 'DataImport'},{className: 'NoIncomingArrow'}], x:-6.928, y:-1.448},
+	{type:'Map Value', label:'[Map Value]', id:'MapValue1', tooltip:'Uses ', pathKey:'RH_1.pyModelProcess.pyShapes(MapValue1)', pzInsKey:'', pyClassName:'DMOrg-GFW-Work', indicators: [{className: 'Summary', label: 'Uses '},{className: 'MapValue'}], x:-6.952, y:-0.84, pxObjClass:'Data-MO-DSM-Reference'},
+	{type:'Scorecard', label:'[Scorecard Model]', id:'Scorecard1', tooltip:'Uses ', pathKey:'RH_1.pyModelProcess.pyShapes(Scorecard1)', pzInsKey:'', pyClassName:'DMOrg-GFW-Work', indicators: [{className: 'Summary', label: 'Uses '},{className: 'ScorecardModel'}], x:-1.6, y:-0.816, pxObjClass:'Data-MO-DSM-Reference'},
+	{type:'Financial', label:'[Financial Calculation]', id:'Financial1', tooltip:'Not configured', pathKey:'RH_1.pyModelProcess.pyShapes(Financial1)', indicators: [{className: 'Summary', label: 'Not configured'},{className: 'FinancialCalculation'}], x:-6.944, y:1.224},
+	{type:'ExpressionFilter', label:'[Filter]', id:'ExpressionFilter1', tooltip:'Not configured', pathKey:'RH_1.pyModelProcess.pyShapes(ExpressionFilter1)', indicators: [{className: 'Summary', label: 'Not configured'},{className: 'Filter'}], x:-2.984, y:-0.152},
+	{type:'InteractionHistory', label:'[Interaction History]', id:'InteractionHistory1', tooltip:'Imports History  for last 31 days without any filter condition from IH', pathKey:'RH_1.pyModelProcess.pyShapes(InteractionHistory1)', indicators: [{className: 'Summary', label: 'Imports History  for last 31 days without any filter conditio...'},{className: 'InteractionHistory'},{className: 'NoIncomingArrow'}], x:-5.632, y:-1.44},
+	{type:'Decision Table', label:'[Decision Table]', id:'DecisionTable1', tooltip:'Uses ', pathKey:'RH_1.pyModelProcess.pyShapes(DecisionTable1)', pzInsKey:'', pyClassName:'DMOrg-GFW-Work', indicators: [{className: 'Summary', label: 'Uses '},{className: 'DecisionTable'}], x:-2.968, y:-1.464, pxObjClass:'Data-MO-DSM-Reference'},
+	{type:'Split', label:'[Split]', id:'Split1', tooltip:'Sets always segment Default', pathKey:'RH_1.pyModelProcess.pyShapes(Split1)', indicators: [{className: 'Split'},{className: 'Summary', label: 'Sets always segment Default'}], x:-1.6, y:-1.456},
+	{type:'Iteration', label:'[Iteration]', id:'Iteration1', tooltip:'Iterates 10 times and does not set any properties yet', pathKey:'RH_1.pyModelProcess.pyShapes(Iteration1)', indicators: [{className: 'Summary', label: 'Iterates 10 times and does not set any properties yet'},{className: 'Iteration'}], x:-1.6, y:0.512},
+	{type:'PrioritizationRule', label:'[Prioritize]', id:'PrioritizationRule1', tooltip:'Not configured', pathKey:'RH_1.pyModelProcess.pyShapes(PrioritizationRule1)', indicators: [{className: 'Summary', label: 'Not configured'},{className: 'Prioritize'}], x:-1.584, y:-0.136},
+	{type:'Predictive Model', label:'[Predictive Model]', id:'PredictiveModel1', tooltip:'Uses ', pathKey:'RH_1.pyModelProcess.pyShapes(PredictiveModel1)', pzInsKey:'', pyClassName:'DMOrg-GFW-Work', indicators: [{className: 'PredictiveModel'},{className: 'Summary', label: 'Uses '}], x:-2.984, y:-0.824, pxObjClass:'Data-MO-DSM-Reference'},
+	{type:'Adaptive', label:'[Adaptive Model]', id:'Adaptive1', tooltip:'Using ', pathKey:'RH_1.pyModelProcess.pyShapes(Adaptive1)', pzInsKey:'', pyClassName:'DMOrg-GFW-Work', indicators: [{className: 'Summary', label: 'Using '},{className: 'AdaptiveModel'}], x:-4.328, y:-0.832, pxObjClass:'Data-MO-DSM-AdaptiveModel'},
+	{type:'Strategy', label:'[Sub Strategy]', id:'Strategy1', tooltip:'Imports  from ', pathKey:'RH_1.pyModelProcess.pyShapes(Strategy1)', pzInsKey:'', pyClassName:'DMOrg-GFW-Work', indicators: [{className: 'Summary', label: 'Imports  from '},{className: 'SubStrategy'},{className: 'NoIncomingArrow'}], x:-8.272, y:-1.424, pxObjClass:'Data-MO-DSM-DataImport'},
+	{type:'Challenger', label:'[Champion Challenger]', id:'Challenger1', tooltip:'Not configured', pathKey:'RH_1.pyModelProcess.pyShapes(Challenger1)', indicators: [{className: 'Summary', label: 'Not configured'},{className: 'ChampionChallenger'}], x:-5.64, y:0.504},
+	{type:'Annotation', label:'[Enter Text Here]', id:'Annotation1', pathKey:'RH_1.pyModelProcess.pyAnnotationShapes(Annotation1)', x:-8.288, y:-0.424}
+],
+edges: [
+	{from: 'Scorecard1', to:'Output',type:'Inheritance', label:'hello', id:'Transition1', tooltip:'Includes hello', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition1)'},
+	{from: 'Iteration1', to:'Output',type:'Inheritance', label:'hi', id:'Transition', tooltip:'Includes hi', pathKey:'RH_1.pyModelProcess.pyConnectors(Transition)'}
+]
+};
+
+//Disable scrolling by default, if we don't do this, scrollbars show/hide unexpectedly
+//document.body.scroll = "no";
+
+var stencil;
+if (debugLog)
+	gfw.util.debug();
+
+function startViewer() {
+	if (!stencil)
+		stencil = document.getElementById("StencilStyleXML").value;
+	ViewerManager.startViewer(null, _.cloneDeep(viewerConfig));
+}
+
+function loadModel() {
+	var viewer = ViewerManager.getViewer();
+	if (viewer) {
+		viewer.update(_.cloneDeep(model2));
+		//viewer.update(createTestModel(5000));
+	}
+  viewer.graph.viewBase.focus();
+}
+
+function destroyViewer(){
+    ViewerManager.destroyViewer();
+}
+
+function createTestModel(size) {
+	var model = {settings: {}, nodes:[{type:'root', label:'Purchase Request', autoLayoutEnabled:true}], edges: []};
+	var dpi = 125;
+	var gap = 20;
+	var x = gap, y = gap;
+	for (var i = 0; i < size; i++) {
+		model.nodes.push({type: "ExpressionFilter" /*vertexTypes[_.random(0, vertexTypes.length-1)].name*/, label: "somebody, some", indicators: [{className: 'Summary', label: 'Not configured blah blah'}, {className: 'Filter'}], x: x/dpi, y: y/dpi});
+		x += 150 + gap;
+		if (x > 1000) {
+			x = gap;
+			y += 60 + gap;
+		}
+	}
+	return model;
+}
+
+function createShape(name, type, indicators) {
+	return {type: type, label:name, id: name, indicators: indicators};
+}
+
+function createChildren(model, node, size, level, maxlevel) {
+	if (level >= maxlevel) return;
+	var v1, id;
+	var fromid = _.isArray(node) ? node[0].id : node.id;
+	for (var i = 0; i < size; i++) {
+		id = fromid + "-" + level + ":" + i;
+		v1 = createShape(id, "Assignment", [{className: 'SLAModifier'}]);
+		model.nodes.push(v1);
+		model.edges.push({type:'Transition', from: fromid, to:id, id:fromid+id});
+		createChildren(model, v1, size, level+1, maxlevel);
+	}
+}
+
+function testUpdate() {
+  var model = {nodes: [
+	{type:'root', label:'test1', id:'Rule-Decision-Strategy'},
+	{type:'StrategySet', label:'Strategy Set', id:'StrategySet1', tooltip:'jji', pathKey:'RH_2.pyModelProcess.pyShapes(StrategySet1)',
+		indicators: [{className: 'summary', label: 'jji'},{className: 'dataEnrichment'}], x:0.48, y:0.48}
+	],
+	edges: [] };
+	ViewerManager.getViewer().update(model);
+}
+
+function testImageCapture() {
+	ViewerManager.executeAction("saveFlowImage");
+}
+
+function testDialog(){
+    ViewerManager.getViewer().showDialog("Dialog content111", "Dialog title111");
+}
+
+function toggleZoom() {
+	var graph = ViewerManager.currentViewer.graph;
+	var currentScale = graph.scale();
+	if (currentScale == 1.0)
+		ViewerManager.executeAction({name: "zoom", zoom: 2});
+	else
+		ViewerManager.executeAction({name: "zoom", zoom: 'actual'});
+}
+
+</script>
+
+<TEXTAREA id="StencilStyleXML" style="display:none">
+	<mxStylesheet>
+		//collect nodes styles
+		<add as="typeAdaptiveModel">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Adaptive Model]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FEE8B9"/>
+			<add as="strokeColor" value="#FEE8B9"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': -2, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="AdaptiveModel$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'true', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeDecisionTable">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Decision Table]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FDD7B7"/>
+			<add as="strokeColor" value="#FDD7B7"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="DecisionTable$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeDecisionTree">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Decision Tree]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FDD7B7"/>
+			<add as="strokeColor" value="#FDD7B7"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$1" value="_box={'x': -1, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="DecisionTree$2" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$3" value="_box={'x': -1, 'y': -1, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeMapValue">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Map Value]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FDD7B7"/>
+			<add as="strokeColor" value="#FDD7B7"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="MapValue$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typePredictiveModel">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Predictive Model]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FEE8B9"/>
+			<add as="strokeColor" value="#FEE8B9"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$1" value="_box={'x': -1, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="PredictiveModel$2" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$3" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeSegmentFilter">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Segment Filter]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#CAE8C1"/>
+			<add as="strokeColor" value="#CAE8C1"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="SegmentFilter$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeScorecardModel">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Scorecard Model]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FEE8B9"/>
+			<add as="strokeColor" value="#FEE8B9"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$1" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="ScorecardModel$2" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeDataImport">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Data Import]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#B0DEF3"/>
+			<add as="strokeColor" value="#B0DEF3"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="DataImport$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="NoIncomingArrow$2" value="_box={'x': -10, 'y': 0, 'v': -2, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$3" value="_box={'x': -4, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typePropositionData">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Proposition Data]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#B0DEF3"/>
+			<add as="strokeColor" value="#B0DEF3"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="PropositionData$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeSubStrategy">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="hexagon" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="hexagonPerimeter" />
+			<add as="label" value="[Sub Strategy]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="middle"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 120            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#0097D5"/>
+			<add as="strokeColor" value="#0097D5"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': -2, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="SubstrategyButton$1" value="_box={'x': 6, 'y': 0, 'v': 0.5, 'h': -1, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 5, 'y': 15, 'v': 0, 'h': -2, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeDataJoin">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Data Join]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#D4D7DB"/>
+			<add as="strokeColor" value="#D4D7DB"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="DataJoin$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeSetProperty">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Set Property]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#D4D7DB"/>
+			<add as="strokeColor" value="#D4D7DB"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="SetProperty$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typePrioritization">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Prioritize]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#222222"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#CAE8C1"/>
+			<add as="strokeColor" value="#CAE8C1"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Prioritize$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeFilter">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Filter]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="54px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="red"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#CAE8C1"/>
+			<add as="strokeColor" value="#CAE8C1"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Filter$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeSwitch">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Switch]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#222222"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#F6C0C0"/>
+			<add as="strokeColor" value="#F6C0C0"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Switch$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeChampionChallenger">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Champion Challenger]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#222222"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#F6C0C0"/>
+			<add as="strokeColor" value="#F6C0C0"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="ChampionChallenger$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeGroupBy">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Group By]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#222222"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#DED1DF"/>
+			<add as="strokeColor" value="#DED1DF"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="GroupBy$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeFinancialCalculation">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Financial Calculation]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#222222"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#DED1DF"/>
+			<add as="strokeColor" value="#DED1DF"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="FinancialCalculation$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeAnnotation">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Note]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#444444"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 128            " />
+			<add as="height" value="                 128            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FFFEBF"/>
+			<add as="strokeColor" value="#DEDD49"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeOutput">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="hexagon" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="hexagonPerimeter" />
+			<add as="label" value="Strategy" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="60&#37;" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="middle"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 120            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FD8037"/>
+			<add as="strokeColor" value="#FD8037"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typePolicy">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Contact Policy]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#CAE8C1"/>
+			<add as="strokeColor" value="#CAE8C1"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': -2, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="ContactPolicy$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeInteractionHistory">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Interaction History]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#AADDF0"/>
+			<add as="strokeColor" value="#AADDF0"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="InteractionHistory$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="NoIncomingArrow$2" value="_box={'x': -10, 'y': 0, 'v': -2, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$3" value="_box={'x': -4, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="ErrorMessage">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="70px" />
+			<add as="labelHeight" value="25px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="4" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="True"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 240            " />
+			<add as="height" value="                 80            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#F9BEBF"/>
+			<add as="strokeColor" value="#EC3843"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeGeofence">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Geofence]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#CAE8C1"/>
+			<add as="strokeColor" value="#CAE8C1"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': -2, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Geofence$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeDecisionParameters">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Decision Parameters]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#D4D7DB"/>
+			<add as="strokeColor" value="#D4D7DB"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="DecisionParameters$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': -4, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeSplit">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Split]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#FDD7B7"/>
+			<add as="strokeColor" value="#FDD7B7"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Split$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeExclusion">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Exclusion]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#F6C0C0"/>
+			<add as="strokeColor" value="#F6C0C0"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Exclusion$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeInput">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="ellipse" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="ellipsePerimeter" />
+			<add as="label" value="Input" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="60px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="middle"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="width" value="                 90            " />
+			<add as="height" value="                 90            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#0097D5"/>
+			<add as="strokeColor" value="transparent"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="typeIteration">
+			<add as="role" value="node" />
+			<add as="canHasChildren" value="" />
+			<add as="shape" value="rectangle" />
+			<add as="anchorPointsCount" value="0" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="[Iteration]" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="80px" />
+			<add as="labelHeight" value="48px" />
+			<add as="labelOffsetX" value="                 64            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="middle"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Verdana" />
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="zIndex" value="" />
+			<add as="image" value=""/>
+			<add as="fillColor" value="#DED1DF"/>
+			<add as="strokeColor" value="#DED1DF"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+			<add as="dashed" value="0"/>
+			<add as="Summary$0" value="_box={'x': 0, 'y': 0, 'v': -4, 'h': 0.5, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Iteration$1" value="_box={'x': 0, 'y': 0, 'v': 0.5, 'h': -2, 'tooltip': '',  'nodePart': true , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+			<add as="Error$2" value="_box={'x': 0, 'y': 0, 'v': 0, 'h': 0, 'tooltip': '',  'nodePart': false , 'showAlways': 'false', 'zIndex': 0 , 'attachEdge': false }" />
+		</add><!-- At design time directly include used Modifier Types here-->     //collect modifiers styles
+		<add as="Summary">
+			<add as="role" value="modifier" />
+			<add as="shape" value="rectangle" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Summary" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="-2" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="100 &#37;" />
+			<add as="labelHeight" value="100 &#37;" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="left" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='10'/>
+			<add as="fontColor" value="#888888"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 150            " />
+			<add as="height" value="                 30            " />
+			<add as="direction" value="none"/>
+			<add as="image" value=""/>
+			<add as="fillColor" value="transparent"/>
+			<add as="strokeColor" value="transparent"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="Error">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="16px" />
+			<add as="labelHeight" value="16px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Verdana" />
+			<!-- Label style -->
+			<add as="width" value="                 17            " />
+			<add as="height" value="                 17            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzError_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="DecisionTable">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Decision Table" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90 &#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzDecisionTable_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="DecisionTree">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Decision Tree" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzDecisionTree_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="MapValue">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Map Value" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzMapValue_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="SegmentFilter">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Segment Filter" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzSegmentFilter_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="ScorecardModel">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Scorecard Model" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzScorecardModel_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="PredictiveModel">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Predictive Model" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzPredictiveModel_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="AdaptiveModel">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Adaptive Model" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzAdaptiveModel_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="SubStrategy">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Sub Strategy" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzSubStrategy_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="PropositionData">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Proposition Data" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzPropositionData_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="DataImport">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Data Import" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzDataImport_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="SetProperty">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Set Property" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzDataTransform_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="DataJoin">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Data Join" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzDataJoin_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="Prioritize">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Prioritize" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzPrioritization_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="Filter">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Filter" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzFilter_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="Switch">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Switch" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzSwitch_Modifier.svg"/>
+			<add as="fillColor" value="#E23D40"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="ChampionChallenger">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Champion Challenger" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzChampionChallenger_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="GroupBy">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Group By" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzAggregationGroupBy_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="FinancialCalculation">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Financial Calculation" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzFinancialCalculation_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="NoIncomingArrow">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="25px" />
+			<add as="labelHeight" value="25px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Verdana" />
+			<!-- Label style -->
+			<add as="width" value="                 16            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzNoIncomingArrow_Modifier.svg"/>
+			<add as="fillColor" value="#333333"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="0" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="ReferenceInfo">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="25px" />
+			<add as="labelHeight" value="25px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Verdana" />
+			<!-- Label style -->
+			<add as="width" value="                 15            " />
+			<add as="height" value="                 11            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzReferenceInfo_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="ContactPolicy">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Contact Policy" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzContactPolicy_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="InteractionHistory">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Interaction History" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 10            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzInteractionHistory_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="SubstrategyButton">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="0.5" />
+			<add as="labelWidth" value="25px" />
+			<add as="labelHeight" value="25px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 0            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="top"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#000000"/>
+			<add as="fontFamily" value="Verdana" />
+			<!-- Label style -->
+			<add as="width" value="                 18            " />
+			<add as="height" value="                 18            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="webwb/pzmxg_process.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="Geofence">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Geofence Filter" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="60px" />
+			<add as="labelHeight" value="100 &#37;" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 36            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="center"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzGeofence_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="DecisionParameters">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Decision Parameters" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 34            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="center"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzDecisionParameters_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="1"/>
+		</add>
+		<add as="Split">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Split" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 34            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="center"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzSplit_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="Exclusion">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Exclusion" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 34            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="center"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzExclusion_Modifier.svg"/>
+			<add as="fillColor" value="#E23D40"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>
+		<add as="Iteration">
+			<add as="role" value="modifier" />
+			<add as="shape" value="image" />
+			<add as="perimeter" value="rectanglePerimeter" />
+			<add as="label" value="Iteration" />
+			<!-- Label style -->
+			<add as="labelHorizontalPos" value="0.5" />
+			<add as="labelVerticalPos" value="-2" />
+			<add as="labelWidth" value="90&#37;" />
+			<add as="labelHeight" value="32px" />
+			<add as="labelOffsetX" value="                 0            " />
+			<add as="labelOffsetY" value="                 40            " />
+			<add as="labelZIndex" value="" />
+			<add as="labelPadding" value="0" />
+			<add as="align" value="center" />
+			<add as="verticalAlign" value="middle"/>
+			<add as="isLabelAoutofit" value="False"/>
+			<add as="overflow" value=" Hidden" />
+			<add as="fontStyle" value="1"/>
+			<add as="fontSize" value='9'/>
+			<add as="fontColor" value="#FFFFFF"/>
+			<add as="fontFamily" value="Arial" />
+			<!-- Label style -->
+			<add as="width" value="                 60            " />
+			<add as="height" value="                 60            " />
+			<add as="direction" value="none"/>
+			<add as="image" value="dsmimages/pzAggregationIteration_Modifier.svg"/>
+			<add as="fillColor" value="#FF0000"/>
+			<add as="strokeColor" value="#000000"/>
+			<add as="strokeWidth" value="1" />
+			<add as="opacity" value="100"/>
+			<add as="gradientDirection" value="none"/>
+			<add as="shadow" value="0"/>
+			<add as="rounded" value="0"/>
+		</add>//collect connectors styles
+		<add as="defaultEdge">
+			<add as="role" value="connection" />
+			<add as="shape" value="connector"/>
+			<add as="edgeStyle" value="none" />
+			<add as="startArrow" value="none" />
+			<add as="endArrow" value="block" />
+			<add as="endSize" value="10" />
+			<add as="startSize" value="6" />
+			<add as="label" value="Label" />
+			<add as="labelLocation" value="                   1.0          " />
+			<add as="labelZIndex" value="" />
+			<add as="labelBackgroundColor" value="#FFFFFF" />
+			<add as="dashed" value="0" />
+			<add as="zIndex" value="50" />
+			<add as="opacity" value="100"/>
+			<add as="strokeWidth" value="1" />
+			<add as="strokeColor" value="#868E8E"/>
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#333333"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="rounded" value="1"/>
+			<add as="shadow" value="0"/>
+		</add><!-- At design time directly include used Modifier Types here-->
+		<add as="ReferenceEdge">
+			<add as="role" value="connection" />
+			<add as="shape" value="connector"/>
+			<add as="edgeStyle" value="entityRelationEdgeStyle" />
+			<add as="startArrow" value="oval" />
+			<add as="endArrow" value="oval" />
+			<add as="endSize" value="8" />
+			<add as="startSize" value="4" />
+			<add as="label" value="Label" />
+			<add as="labelLocation" value="                   1.0          " />
+			<add as="labelZIndex" value="" />
+			<add as="labelBackgroundColor" value="#FFFFFF" />
+			<add as="dashed" value="1" />
+			<add as="zIndex" value="100" />
+			<add as="opacity" value="100"/>
+			<add as="strokeWidth" value="1" />
+			<add as="strokeColor" value="#3C8DC5"/>
+			<add as="fontStyle" value="0"/>
+			<add as="fontSize" value='12'/>
+			<add as="fontColor" value="#006E91"/>
+			<add as="fontFamily" value="Arial" />
+			<add as="rounded" value="0"/>
+			<add as="shadow" value="0"/>
+			<add as="ReferenceInfo$0" value="_box={'x': '80%', 'zIndex': '85',  'nodePart': true }" />
+		</add> <!-- At design time directly include used Modifier Types here-->
+	</mxStylesheet>
+</TEXTAREA>
+</body>
+</html>

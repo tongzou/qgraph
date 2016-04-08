@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Documentation - HOE Responsive Bootstrap sidebar Menu</title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="http://fonts.googleapis.com/css?family=Lato:100italic,100,300italic,300,400italic,400,700italic,700,900italic,900" rel="stylesheet" type="text/css">
+    <link href="css/custom.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	  <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
+
+</head>
+
+<body data-spy="scroll" data-target=".scrollspy">
+	
+	<header id="header" class="navbar navbar-default navbar-inverse" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">HOE Navigation Menu</a>
+			</div>
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav">
+					<li class="active"> <a href="#">Documentation</a> </li>
+					<li> <a href="http://gohooey.com/demo/sidebar/hoedemo.html">Demo</a> </li> 
+					<li> <a href="http://codecanyon.net/item/responsive-bootstrap-sidebar-navigation/11784410">Buy The Sidebar Menu</a> </li>  					
+				</ul>  
+			</div>
+		</div>
+	</header>
+	<div class="jumbotron">
+		<div class="container">
+			<div class="col-md-8 column"> 
+				<h3>HOE Responsive Bootstrap Sidebar Navigation Menu </h3>
+					<p>A Beautiful, Professional and Ultimate HOE Responsive bootstrap Navigation Menu</p>
+					<p>HOE Navigation Menu consist of both Horizantal and Vertical navigation menu based on CSS3 and Jquery. 
+					Its lightweight and compatible with almost all major browsers and devices. 
+					It supports four levels sub menu with shrink, Overlay and push effect.</p>
+			</div>
+			<div class="col-md-4 column"> 
+				<img src="images/Banner_590x300.jpg" class="img-responsive">
+			</div>
+		</div>	
+		
+	</div>
+	<div class="sub-doc-nav">
+		<div class="container">
+			Thank You For Purchasing One of Our Premium Items!.
+		</div>
+	</div>
+	<div class="content">
+		<div class="container">
+			<div class="row clearfix">
+				<div class="col-md-3 column scrollspy"> 
+					<div class="doc-sidebar hidden-xs hidden-sm" id="myAffix" >
+						<ul class="nav nav-pills nav-stacked">
+							<li ><a href="#section1">Navigation Features</a></li>		
+							<li><a href="#section2">How to Use ?</a></li>							
+							<li><a href="#section3">Sidebar Effects</a></li>
+							<li><a href="#section4">Navigation Types</a></li>
+							<li><a href="#section5">Sidebar Placements</a></li>
+							<li><a href="#section6">Navigation Color Themes</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-9 column" > 
+					<div class="doc-content"> 
+						<div id="#section1" class="doc-section-box">
+							<h3>Navigation Features</h3>							
+							<ul>
+								<li>Design & Developed to supports any device using latest Bootstrap framework.</li>
+								<li>Multiple levels</li>
+								<li>100% Responsive and Mobile Friendly </li>
+								<li>Vertical Navigation with both Left/Right Sidebar Support</li>
+								<li>Create your own theme with theme options</li>
+								<li>11 Effects for both Vertial and Horizontal Menu</li>
+							</ul>
+							
+						</div>
+						
+						<div id="section2" class="doc-section-box">
+						<h3>How to Use?</h3>
+						<p>Here are described varios ways of using this sidebar, you can read and adapt them to your website's requeriments. 
+							Below are described all options with details.</p>
+							<h3>Simplest Usage - Default HTML Code</h3>
+							<textarea class="form-control" rows="10" style="color:#000; font-size:11px;">
+<body hoe-navigation-type="vertical" hoe-nav-placement="left" >
+    <div id="hoeapp-wrapper" class="hoe-hide-lpanel" hoe-device-type="desktop">
+        <header id="hoe-header" hoe-lpanel-effect="shrink">
+            <div class="hoe-left-header"> 
+            </div> 
+            <div class="hoe-right-header" hoe-position-type="relative" >  
+            </div>
+        </header>
+        <div id="hoeapp-container" hoe-color-type="lpanel-bg2" hoe-lpanel-effect="shrink">
+            <aside id="hoe-left-panel" hoe-position-type="absolute"> 
+                <ul class="nav panel-list">
+                    <li class="nav-level">Navigation</li>
+                    <li class="active">
+                        <a href="javascript:void(0)">
+                            <i class="fa fa-tachometer"></i>
+                            <span class="menu-text">Dashboard</span>
+                            <span class="selected"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:void(0)">
+                            <i class="fa fa-bar-chart"></i>
+                            <span class="menu-text">Graphs</span>
+                            <span class="label sul">New</span>
+                            <span class="selected"></span>
+                        </a>
+                    </li>
+                    <li class="hoe-has-menu">
+                        <a href="javascript:void(0)">
+                            <i class="fa fa-files-o"></i>
+                            <span class="menu-text">Other Pages</span>
+                            <span class="selected"></span>
+                        </a>
+                        <ul class="hoe-sub-menu">
+                            <li>
+                                <a href="javascript:void(0)">
+                                    <span class="menu-text">Blank Page</span>
+                                    <span class="selected"></span>
+                                </a>
+                            </li> 
+                        </ul>
+                    </li> 
+                </ul>
+            </aside>
+            <section id="main-content"> 
+            </section> 
+        </div>
+    </div>
+</body>
+            
+							</textarea>
+							<h3>Files to Include</h3>
+							<textarea class="form-control" rows="10" style="color:#000; font-size:11px;">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="http://fonts.googleapis.com/css?family=Lato:100italic,100,300italic,300,400italic,400,700italic,700,900italic,900" rel="stylesheet" type="text/css">
+    <link href="css/hoe.css" rel="stylesheet">    
+    <script src="js/1.11.2.jquery.min.js"></script>    
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/hoe.js"></script>
+            
+							</textarea>
+						
+						</div>
+						
+						<div id="section3" class="doc-section-box">
+						<h3>Side Bar Effects</h3>
+						<p>Here are described varios ways on how we can apply effects on sidebar. The sidebar supports PUSH/OVERLAY/SHRINK, you can read and adapt them to your website's requeriments. 
+							Below are described all options with details.</p>
+							<h3>1. PUSH Effect</h3>
+							<p>This demonstrates the push effect in which the content slides to the right making space for the left sidebar
+							To use this effect you need to add the attribute <code>hoe-lpanel-effect="push"</code>. Please see the below image where you can see the attribute highlighed in yellow.</p>
+							<img src="images/push-effect.png" class="img-responsive img-border">
+							
+							<h3>2. Overlay Effect</h3>
+							<p>This demonstrates the overlay effect in which the left sidebar overlays the content area.
+							To use this effect you need to add the attribute <code>hoe-lpanel-effect="overlay"</code>. Please see the below image where you can see the attribute highlighed in yellow.</p>
+							<img src="images/overlay-effect.png" class="img-responsive img-border">
+							
+							
+							<h3>3. Shrink Effect</h3>
+							<p>This demonstrates the shrink effect in which the left sidebar is on collapsed state to provide more space to the content area.  By default this effect is being used.
+							To use this effect you need to add the attribute <code>hoe-lpanel-effect="shrink"</code>. Please see the below image where you can see the attribute highlighed in yellow.</p>
+							<img src="images/shrink-effect.png" class="img-responsive img-border">
+						</div>
+						
+						
+						<div id="section4" class="doc-section-box">
+						<h3>Navigation Menu Types</h3>
+						<p>We have provided 4 types of Navigations Vertical(Sidebar) and Horizontal.
+						<ul>
+								<li>Vertical Sidebar Expanded State</li>
+								<li>Vertical Sidebar Collapsed State</li>
+								<li>Horizontal Menu Full Menu</li>
+								<li>Horizontal Menu Compact Menu</li>								
+							</ul>
+							Below are described all options with details.</p>
+							<h3>1. Vertical Sidebar Expanded State</h3>
+							<p>This demonstrates the sidebar in expanded state.
+							By default the Sidebar is in expanded state.
+							<img src="images/sidebar_expandedState.png" class="img-responsive img-border">
+							
+							<h3>2. Vertical Sidebar Collapsed State</h3>
+							<p>This demonstrates the sidebar in collapsed state.
+							To use this view you need to add the attribute <code>hoe-navigtaion-type="vertical-compact"</code> on the body. Also you need to add <code>class="minimized=lpanel"</code> on <code>#header</code> and <code>"#theme-container"></code> 
+							Please see the below image where you can see the attributes and classes highlighed in yellow.</p>
+							<img src="images/vertical-compact-menu.png" class="img-responsive img-border">							
+							<br>
+							<p>Collapsed Sidebar State shown below</p>
+							<img src="images/CollapsedState.png" class="img-responsive img-border">
+							
+							<h3>3. Horizontal Menu Full</h3>
+							<p>This demonstrates the horizontal menu which will be display between the content area and header area. 
+							To use this view you need to add the attribute <code>hoe-navigtaion-type="horizontal"</code> on the body.
+							Please see the below image where you can see the attributes and classes highlighed in yellow.</p>
+							<img src="images/horizontal-menu.png" class="img-responsive img-border">
+							<br>
+							<p>Horizontal Menu shown below</p>
+							<img src="images/HorizontalMenu.png" class="img-responsive img-border">
+							
+							<h3>4. Horizontal Menu Compact</h3>
+							<p>This demonstrates the horizontal menu in compact state. 
+							To use this view you need to add the attribute <code>hoe-navigation-type="horizontal"</code>on the body and add class <code>"compact-hmenu"</code> on <code> #hoeapp-wrapper</code>.
+							Please see the below image where you can see the attributes and classes highlighed in yellow.</p>
+							<img src="images/horizontal-compact.png" class="img-responsive img-border">
+							<br>
+							<p>Horizontal Menu shown below</p>
+							<img src="images/HorizontalMenuCompact.png" class="img-responsive img-border">
+						</div>
+						<div id="section5" class="doc-section-box">
+							<h3>Sidebar Placement</h3>
+						<p>We have provided two Sidebar options.
+						<ul>
+								<li>Sidebar on the Left</li>
+								<li>Sidebar on the Right</li>								
+							</ul>
+							Below are described all options with details.</p>
+							<h3>1. Sidebar on the Left</h3>
+							<p>By default the Sidebar is on the left side.
+							<img src="images/CollapsedState.png" class="img-responsive img-border">
+							</br>
+							
+							<h3>2. Sidebar on the Right</h3>
+							To use this view you need to add the attribute <code>hoe-nav-placement="right"</code>, <code>hoe-navigation-type="vertical"</code>on the body. 
+							Please see the below image where you can see the attributes and classes highlighed in yellow.</p>
+							<img src="images/right-sidebar.png" class="img-responsive img-border">
+							
+							<p>Sidebar Menu on the right shown below</p>
+							<img src="images/sidebar_right.png" class="img-responsive img-border">
+						</div>
+						<div id="section6" class="doc-section-box">
+							<h3>Color Themes</h3>
+							<p>The Navigation comes with various color options. A user can customize the colors as per his/her convenience for header and navigation</p>
+							<p>Color theme options shown below</p>
+							<img src="images/Theme_colors.png" class="img-responsive img-border">
+						</div>
+						
+					
+						
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+ 
+	
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/1.11.2.jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+<script>
+	$('#myAffix').affix({
+  offset: {
+   top: $('#myAffix').offset().top
+  }
+})
+</script>
+ 
+
+</body>
+
+</html>

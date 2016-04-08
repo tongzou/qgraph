@@ -5,3 +5,4 @@ desktop.ini
 *node_modules*
 *npm-debug*
 coverage
+lib
