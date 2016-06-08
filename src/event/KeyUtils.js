@@ -4,8 +4,38 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-import _ from "lodash";
 import StringBuffer from "./../util/StringBuffer";
+
+/**
+ * KEY constant
+ */
+const KEY = {
+	ALT          : 18,
+	BACK_SPACE   : 8,
+	CAPS_LOCK    : 20,
+	CONTROL      : 17,
+	DELETE       : 46,
+	DOWN         : 40,
+	END          : 35,
+	ENTER        : 13,
+	ESCAPE       : 220,
+	HOME         : 36,
+	LEFT         : 37,
+	META         : 224,
+	NUM_LOCK     : 144,
+	PAGE_DOWN    : 34,
+	PAGE_UP      : 33,
+	PAUSE        : 19,
+	PRINTSCREEN  : 44,
+	RIGHT        : 39,
+	SCROLL_LOCK  : 145,
+	SHIFT        : 16,
+	SPACE        : 32,
+	TAB          : 9,
+	UP           : 38
+	//ADD          : DomUtils.isFireFox ? 61  : 187,
+	//SUBTRACT     : DomUtils.isFireFox ? 173 : 189
+};
 
 export function getKeyEvent(event) {
 	if (!event || !event instanceof KeyboardEvent) {

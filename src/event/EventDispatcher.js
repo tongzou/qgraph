@@ -1,27 +1,25 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-//                           The Event Manager                               //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
-
 import _ from "lodash";
+import Events from "bean";
 import * as KeyUtils from "./KeyUtils";
 import DomUtils from "../util/DomUtils";
+import Utils from "../util/Utils";
 import StringBuffer from "./../util/StringBuffer";
-const d3 = require("d3");
 
-export default class EventManager {
+export default class EventDispatcher {
 	/**
 	 * Constructor
 	 * @param root the root element that the manager will listen to.
-	 * @param data optional data element for the root.
+	 * @param zoomScale
 	 */
-	constructor(root, data) {
+	constructor(root, zoomScale = [0, Infinity]) {
 		this.root = root;
-		if (data)
-			this.root.__data__ = data;
-		this.d3root = d3.select(root);
+		this.rootNS = root.getAttribute('ns') || 'root';
+		this.zoomScale = zoomScale;
+		this.scale = 1.0;
 		this.listeners = {};
+		this.dragging = false;
+		this.handler = _.bind(this.handleEvent, this);
+		this.started = false;
 
 		// Simulate mouseenter/mouseleave events
 		this.enterStack = [];
@@ -30,175 +28,138 @@ export default class EventManager {
 	/**
 	 * Start listening for events.
 	 */
-	startEvents() {
-		let f = () => this.dispatch();
-		this.d3root.on('mousedown', f)
-			.on('mouseover', f)
-			.on('mouseout', f)
-			.on('mouseenter', f)
-			.on('mouseleave', f)
-			.on('dblclick', f)
-			.on('click', f)
-			.on('contextmenu', f);
-
-		this.startPositionEvents();
-		this.startZoomEvents();
-		this.startKeyEvents();
-	}
-
-	startPositionEvents() {
-		let t = _.throttle(this.getPosition, 100, {'leading':true, 'trailing':false});
-		let f = _.bind(t, this);
-
-		this.d3root.on('mousemove.p', f);
-	}
-
-	startZoomEvents() {
-		// Initialize zoom listener
-		let zoomHandler = () => {
-			if (this.dragging) return;
-			this.sendDispatch(d3.event.type, 'root', null);
-		};
-		this.zoom = d3.behavior.zoom()
-			.scaleExtent([0.5, 4])
-			.on("zoomstart", zoomHandler)
-			.on("zoom", zoomHandler)
-			.on("zoomend", zoomHandler);
-		this.d3root.call(this.zoom).on('mousedown.zoom', null).on("dblclick.zoom", null);
-	}
-
-	startKeyEvents() {
-		let f = () => this.dispatch();
-		d3.select(document).on('keydown', f).on('keyup', f);
+	start() {
+		if (this.started) return;
+		Events.on(this.root, 'mousedown mouseover mouseout mouseenter mouseleave dblclick click contextmenu mousewheel', this.handler);
+		this.startKeys();
+		this.started = true;
 	}
 
 	/**
 	 * Stop listening for events.
 	 */
-	stopEvents() {
-		this.d3root.on('mousedown', null)
-			.on('mouseover', null)
-			.on('mouseout', null)
-			.on('mouseenter', null)
-			.on('mouseleave', null)
-			.on('dblclick', null)
-			.on('click', null)
-			.on('contextmenu', null);
-
-		this.stopPositionEvents();
-		this.stopZoomEvents();
-		this.stopKeyEvents();
+	stop() {
+		if (!this.started) return;
+		Events.off(this.root, 'mousedown mouseover mouseout mouseenter mouseleave dblclick click contextmenu mousewheel', this.handler);
+		this.stopKeys();
+		this.started = false;
 	}
 
-	stopPositionEvents() {
-		this.d3root.on('mousemove.p', null);
+	startKeys() {
+		Events.on(document, 'keydown keyup', this.handler);
 	}
 
-	stopZoomEvents() {
-		this.d3root.on("mousedown.zoom", null)
-			.on("mousemove.zoom", null)
-			.on("dblclick.zoom", null)
-			.on("touchstart.zoom", null)
-			.on("wheel.zoom", null)
-			.on("mousewheel.zoom", null)
-			.on("MozMousePixelScroll.zoom", null);
+	stopKeys() {
+		Events.off(document, 'keydown keyup', this.handler);
 	}
 
-	stopKeyEvents() {
-		d3.select(document).on('keydown', null).on('keyup', null);
-	}
-
-	getEventInfo() {
-		let event = d3.event;
+	getEventInfo(event) {
 		let target = event.target;
-		let buf = new StringBuffer(), ns, data, stack = [];
-
-		while (!data && target && target != document) {
-			data = target.__data__;
-			if (data)
-				event.dataTarget = target;
+		let buf = new StringBuffer(), ns, stack = [], isRoot = false;
+		while (!isRoot && target && target != document) {
 			ns = target.getAttribute('ns');
 			if (ns) {
+				isRoot = _.startsWith(ns, "root.");
+				if (isRoot) {
+					ns = ns.substring(5);
+					event.rootTarget = target;
+				}
 				if (!event.nsTarget) event.nsTarget = target;
 				stack.splice(0, 0, target);
 				buf.prepend(ns);
 			}
 			target = target.parentNode;
 		}
-		if (!data) return null;
+		if (!isRoot)
+			event.rootTarget = event.nsTarget;
 
 		// target stack is a stack of all the ns targets up to the one with the data binding.
 		event.targetStack = stack;
 		ns = buf.toString('.');
-		if (ns == '') ns = 'root';
-		return {data: data, ns: ns};
+		if (ns == '') ns = this.rootNS;
+		return {data: event.rootTarget, ns: ns};
 	}
 
 	/**
-	 * The main dispatcher method, it dispatches the event and data to registered handlers.
+	 * The main event handler method, it processes event and generate relevant events to dispatch.
 	 */
-	dispatch() {
-		let event = d3.event, type = event.type;
+	handleEvent(event) {
+		let type = event.type;
 
 		// Do not dispatch other events if we are dragging.
 		if (this.dragging || DomUtils.eventFromInput(event)) return;
 
-		let data, ns, pos = this.getPosition(), info;
-		if (type == 'keydown' || type == 'keyup') {
-			data = this.graph;
+		let data, ns, pos = this.getPosition(event), info, isKeyEvent = (type == 'keydown' || type =='keyup');
+		if (isKeyEvent) {
+			data = this.root;
 			ns = KeyUtils.getKeyEvent(event);
 		} else {
-			info = this.getEventInfo();
+			info = this.getEventInfo(event);
 			if (!info) return;
 			data = info.data;
 			ns = info.ns;
 		}
 
+		//Utils.log('EventDispatcher', "handleEvent - " + type + ';ns=' + ns);
+
+		if (type == 'mousewheel') {
+			this.scale *= Math.pow(2, event.wheelDelta * 0.002);
+			this.scale = Math.max(Math.min(this.zoomScale[1], this.scale), this.zoomScale[0]);
+			event.scale = this.scale;
+			type = 'zoom';
+		}
+
 		// See if we should create drag events
 		if (type == 'mousedown' && event.button == 0 /*only drag on left click*/) {
 			// Create drag object.
-			const dragObject = {data: data, pos: ns == 'root' ? d3.mouse(this.root) : pos};
+			const dragObject = {data: data, pos: ns == 'root' ? EventDispatcher.mouse(this.root, event) : pos};
 			this.dragging = false;
 			// Start listening for mouse move.
-			let w, dragPos;
+			let dragPos;
 
-			const mousemove = _.bind(function() {
-				let currentPos = this.getPosition();
+			const mousemove = (event) => {
+				let currentPos = this.getPosition(event);
 				if (!this.dragging) {
 					// check if the mouse has moved. IE always fire mousemove after mousedown even if the mouse hasn't moved yet.
 					if (dragObject.pos[0] == currentPos[0] && dragObject.pos[1] == currentPos[1]) return;
 
 					// start dragging
 					this.dragging = true;
-					this.sendDispatch('dragstart', ns, dragObject.data, dragObject.pos);
+					event.rootTarget = dragObject.data;
+					this.dispatch(event, 'dragstart', ns, dragObject.data, dragObject.pos);
 				}
-				if (ns == "graph")
-					dragPos = d3.mouse(this.root);
+				if (ns == "root")
+					dragPos = EventDispatcher.mouse(this.root, event);
 				else
 					dragPos = currentPos;
-				this.getEventInfo();
-				this.sendDispatch('drag', ns, dragObject.data, dragPos);
-			}, this);
-			const mouseup = _.bind(function() {
+				this.getEventInfo(event);
+				this.dispatch(event, 'drag', ns, dragObject.data, dragPos);
+			};
+			const mouseup = (event) => {
 				if (ns == "root")
-					dragPos = d3.mouse(this.root);
+					dragPos = EventDispatcher.mouse(this.root, event);
 				else
-					dragPos = this.getPosition();
+					dragPos = this.getPosition(event);
 
+				let info = this.getEventInfo(event);
 				if (this.dragging) {
 					this.dragging = false;
-					this.sendDispatch('dragend', ns, dragObject.data, dragPos);
-				} else
-					this.sendDispatch('mouseup', ns, this.getEventInfo().data, dragPos);
+					this.dispatch(event, 'dragend', ns, dragObject.data, dragPos);
+				} else {
+					this.dispatch(event, 'mouseup', ns, info.data, dragPos);
+				}
 
-				w.on('mousemove', null).on('mouseup', null);
-			}, this);
+				Events.off(window, 'mousemove', mousemove);
+				Events.off(window, 'mouseup', mouseup);
+			};
 			event.preventDefault();
-			w = d3.select(window).on('mousemove', mousemove).on('mouseup', mouseup);
+			Events.on(window, 'mousemove', mousemove);
+			Events.on(window, 'mouseup', mouseup);
 		}
 
-		this.simulateEnterLeave(type, ns, data, pos);
-		this.sendDispatch(type, ns, data, pos);
+		if (!isKeyEvent)
+			this.simulateEnterLeave(event, type, ns, data, pos);
+		this.dispatch(event, type, ns, data, pos);
 
 		// disable the default context menu
 		if (type == 'contextmenu')
@@ -208,26 +169,30 @@ export default class EventManager {
 	/**
 	 * try to simulate mouseenter/mouseleave events.
 	 */
-	simulateEnterLeave(type, ns, data, pos) {
+	simulateEnterLeave(event, type, ns, data, pos) {
 		let last, stack;
-		const clearEnterStack = k => {
+		const clearEnterStack = (k) => {
 			k = k || 0;
 			// Clear off the enter stack.
 			while (this.enterStack.length >= k + 1) {
 				last = this.enterStack.pop();
-				this.sendDispatch('mouseleave', last.ns, last.data, pos);
+				this.dispatch(event, 'mouseleave', last.ns, last.data, pos);
 			}
 		};
+		const getNS = function(index) {
+			let buf = new StringBuffer();
+			for (let i = 0; i <= index; i++) {
+				var val = stack[i].getAttribute("ns");
+				if (_.startsWith(val, "root."))
+					val = val.substring(5);
+				buf.append(val);
+			}
+			return buf.toString('.');
+		};
 
-		if (ns && ns != 'root') {
-			const getNS = function(index) {
-				let buf = new StringBuffer();
-				for (let j = 0; j <= index; j++)
-					buf.append(stack[j].getAttribute("ns"));
-				return buf.toString('.');
-			};
+		if (ns && ns != this.rootNS) {
 			if (type == 'mouseover') {
-				stack = d3.event.targetStack;
+				stack = event.targetStack;
 				let item;
 				for (let i = 0; i < stack.length; i++) {
 					if (i < this.enterStack.length) {
@@ -238,68 +203,41 @@ export default class EventManager {
 					}
 					item = {data: data, ns: getNS(i), target: stack[i]};
 					this.enterStack.push(item);
-					this.sendDispatch('mouseenter', item.ns, data, pos);
-					if (i == stack.length - 1)
-						d3.select(item.target).on('mouseleave', _.bind(this.dispatch, this));
+					this.dispatch(event, 'mouseenter', item.ns, data, pos);
 				}
-			} else if (type == 'mouseleave') {
-				last = this.enterStack.pop();
-				if (last)
-					d3.select(last.target).on('mouseleave', null);
+				if (stack.length < this.enterStack.length)
+					clearEnterStack(stack.length);
 			}
 		}
-		if (ns == 'root' && this.enterStack.length > 0)
+		if (ns == this.rootNS && this.enterStack.length > 0)
 			clearEnterStack();
 	}
 
-	sendDispatch(type, ns, data, pos) {
-		const event = d3.event;
+	dispatch(event, type, ns, data, pos) {
 		//if (type != 'mouseover' && type != 'mouseout')
-		//	console.log('EventDispatcher', "sendDispatch - " + type + '.' + ns + ';' + pos + ';datatarget=' + event.dataTarget + ';data=' + data);
-		let listeners, listener;
+		//	Utils.log('EventDispatcher', "dispatch - " + type + '.' + ns + ';' + pos + ';rootTarget=' + event.rootTarget + ';data=' + data);
+		if (!this.started) return;
 		const nsType = ns ? type + '.' + ns : type;
-		for (let key in this.listeners) {
-			listeners = this.listeners[key];
-			if (this.match(nsType, key)) {
-				for (let i = 0; i < listeners.length; i++) {
-					listener = listeners[i];
+		_.forEach(this.listeners, (listeners, key) => {
+			if (EventDispatcher.match(nsType, key)) {
+				_.forEach(listeners, (listener) => {
 					if (!listener.context)
 						listener.callback.apply(window, [type, ns, data, pos, event]);
 					else
 						listener.callback.apply(listener.context, [type, ns, data, pos, event]);
-				}
+				});
 			}
-		}
+		});
+
 		// after dispatching, do not propagate.
 		if (event.stopPropagation)
 			event.stopPropagation();
 	}
 
-	/**
-	 * Check if the registered event type matches the real event type. "*" is allowed as a wild card.
-	 */
-	match(nsType, registeredType) {
-		const arr = registeredType.split('*');
-		if (arr.length == 1)
-			return nsType == registeredType;
-
-		let substr, index = 0;
-		for (let i = 0; i < arr.length; i++) {
-			if (arr[i].length == 0) continue;
-			substr = nsType.slice(index);
-			index = substr.indexOf(arr[i]);
-			if (index < 0)
-				return false;
-			index += arr[i].length;
-		}
-		return true;
-	}
-
-	getPosition() {
-		const pos = d3.mouse(this.root); //util.scale(this.graph, d3.mouse(this.graph.viewBase));
-		if(! _.isNaN(pos[0]) && ! _.isNaN(pos[1])) {
+	getPosition(event) {
+		const pos = EventDispatcher.mouse(this.root, event);
+		if(! _.isNaN(pos[0]) && ! _.isNaN(pos[1]))
 			this.lastPosition = pos;
-		}
 		return this.lastPosition;
 	}
 
@@ -307,34 +245,34 @@ export default class EventManager {
 	 * Registers a key event handler
 	 * // Key is object {ctrl, alt, shift, meta, code}
 	 */
-	registerKey(event, key, callback, context) {
+	registerKey(type, key, callback, context) {
 		if (_.isArray(key)) {
-			_.each(key, function(k) {
-				this.registerKey(event, k, callback, context);
-			}, this);
+			_.forEach(key, (k) => {
+				this.registerKey(type, k, callback, context);
+			});
 			return;
 		}
-
-		if(!_.isString(event)) {
-			return;
-		}
-
-		key = KeyUtils.getKeyData(key.ctrl, key.alt, key.shift, key.meta, key.code)
-
-		if(!key.length) {
-			return;
-		}
-
-		key = new StringBuffer(event).append(key).toString('.');
+		key = KeyUtils.getKeyData(key.ctrl, key.alt, key.shift, key.meta, key.code);
+		if(!key.length) return;
+		key = new StringBuffer(type).append(key).toString('.');
 
 		const listener = {callback: callback, context: context};
 		this.listeners[key] || (this.listeners[key] = []);
 		this.listeners[key].push(listener);
 	}
 
-	// TODO: Review since this is a just a copy
-	unregisterKey(event, key, callback, context) {
-		let listeners = this.listeners[type], listener;
+	unregisterKey(type, key, callback, context) {
+		if (_.isArray(key)) {
+			_.forEach(key, (k) => {
+				this.unregisterKey(type, k, callback, context);
+			});
+			return;
+		}
+		key = KeyUtils.getKeyData(key.ctrl, key.alt, key.shift, key.meta, key.code);
+		if(!key.length) return;
+		key = new StringBuffer(type).append(key).toString('.');
+
+		let listeners = this.listeners[key], listener;
 		if (!listeners) return;
 		for (let i = 0; i < listeners.length; i++) {
 			listener = listeners[i];
@@ -350,9 +288,9 @@ export default class EventManager {
 	 */
 	register(type, callback, context, zIndex) {
 		if (_.isArray(type)) {
-			_.each(type, function(t) {
+			_.forEach(type, (t) => {
 				this.register(t, callback, context, zIndex);
-			}, this);
+			});
 			return;
 		}
 		const listener = {callback: callback, context: context, zIndex: zIndex};
@@ -373,12 +311,42 @@ export default class EventManager {
 	}
 
 	destroy() {
-		this.stopEvents();
-		delete this.root.__data__;
+		this.stop();
 		delete this.root;
-		delete this.d3root;
-		delete this.zoom;
 		delete this.listeners;
 		delete this.enterStack;
+	}
+
+	/**
+	 * Check if the registered event type matches the real event type. "*" is allowed as a wild card.
+	 */
+	static match(nsType, registeredType) {
+		const arr = registeredType.split('*');
+		if (arr.length == 1)
+			return nsType == registeredType;
+
+		let substr, index = 0;
+		for (let i = 0; i < arr.length; i++) {
+			if (arr[i].length == 0) continue;
+			substr = nsType.slice(index);
+			index = substr.indexOf(arr[i]);
+			if (index < 0)
+				return false;
+			index += arr[i].length;
+		}
+		return true;
+	}
+
+	static mouse(container, e) {
+		if (e.changedTouches) e = e.changedTouches[0];
+		var svg = container.ownerSVGElement || container;
+		if (svg.createSVGPoint) {
+			var point = svg.createSVGPoint();
+			point.x = e.clientX; point.y = e.clientY;
+			point = point.matrixTransform(container.getScreenCTM().inverse());
+			return [point.x, point.y];
+		}
+		var rect = container.getBoundingClientRect();
+		return [e.clientX - rect.left - container.clientLeft, e.clientY - rect.top - container.clientTop];
 	}
 }

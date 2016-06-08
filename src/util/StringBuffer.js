@@ -34,6 +34,11 @@ export default class StringBuffer {
 		this.buffer = [];
 	}
 
+	removeLast() {
+		this.buffer.pop();
+		return this;
+	}
+
 	toString(sep) {
 		if (!sep) sep = '';
 		return this.buffer.join(sep);

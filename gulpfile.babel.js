@@ -10,7 +10,7 @@ import webpackConfig from "./webpack.config.babel";
 gulp.task('build', () => {
 	return gulp.src( 'src/index.js' )
 		.pipe( webpack( webpackConfig ) )
-		.pipe( gulp.dest( "./lib" ) )
+		.pipe( gulp.dest( "./dist" ) )
 		.pipe( sourcemaps.init( { loadMaps: true } ) )
 		.pipe( uglify( {
 			preserveComments: "license",
@@ -22,5 +22,5 @@ gulp.task('build', () => {
 		} ) )
 		.pipe( rename( "qgraph.min.js" ) )
 		.pipe( sourcemaps.write( "./" ) )
-		.pipe( gulp.dest( "lib/" ) );
+		.pipe( gulp.dest( "dist/" ) );
 });

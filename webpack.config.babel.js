@@ -23,12 +23,6 @@ export default {
 				commonjs: "lodash",
 				commonjs2: "lodash",
 				amd: "lodash"
-			},
-			d3: {
-				root: "d3",
-				commonjs: "d3",
-				commonjs2: "d3",
-				amd: "d3"
 			}
 		}
 	],

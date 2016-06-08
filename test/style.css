@@ -1,57 +1,23 @@
-.container {
-    width: 55%;
-    margin: auto;
-    text-align: center;
+.start {
+    fill: #C5E7C4;
+    stroke: #47B352;
+    stroke-width: 2;
 }
 
-blockquote {
-    background: #f9f9f9;
-    border-left: 10px solid #ccc;
-    border-right: 2px solid #ccc;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    margin: 1.5em 10px;
-    padding: 1.5em 0 1.5em 0;
-    quotes: "\201C""\201D""\2018""\2019";
-    font-size: 110%;
-    font-family: Georgia, serif;
+.assignment {
+    fill: #C5E7C4;
+    stroke: #47B352;
+    stroke-width: 2;
+}
+.assignment text {
+    font-size: 11px;
+    font-family: Arial;
+    stroke-width: 1;
 }
 
-blockquote:before {
-    color: #ccc;
-    content: open-quote;
-    font-size: 4em;
-    line-height: 0.1em;
-    margin-right: 0.25em;
-    vertical-align: -0.4em;
+.end {
+    fill: #F9BEBF;
+    stroke: #EC3843;
+    stroke-width: 2;
 }
 
-blockquote:after {
-    color: #ccc;
-    content: close-quote;
-    font-size: 4em;
-    line-height: 0.1em;
-    margin-left: 0.25em;
-    vertical-align: -0.4em;
-}
-
-blockquote p {
-    display: inline;
-}
-
-button {
-    font-size: 125%;
-    padding: .5em 1em;
-    color: rgba(0,0,0,.8);
-    border: 1pt solid #ccc;
-    background-color: #E6E6E6;
-    text-decoration: none;
-    border-radius: 2px;
-    display: inline-block;
-    zoom: 1;
-    line-height: normal;
-    white-space: nowrap;
-    vertical-align: middle;
-    text-align: center;
-    cursor: pointer;
-}

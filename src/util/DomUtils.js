@@ -1,9 +1,11 @@
+import _ from "lodash";
+
 /**
  * dom Utility functions
  */
 export default {
 	isIE: (function() {
-		var isIE = false, version = null;
+		let isIE = false, version = null, window = window || {}, navigator = navigator || {userAgent: ""};
 		if (Object.hasOwnProperty.call(window, "ActiveXObject") && !window.ActiveXObject) {
 			isIE = true;
 			version = 11;
@@ -25,28 +27,29 @@ export default {
 	})(),
 
 	createElement: function (tag, attribs, styles, html) {
-		var e = document.createElement(tag);
-		this.setElement(e, attribs, styles);
-		if (html) {
-			e.innerHTML = html;
-		}
-		return e;
+		let el = document.createElement(tag);
+		this.setElement(el, attribs, styles);
+		if (html)
+			el.innerHTML = html;
+		return el;
 	},
 
-	setElement: function (e, attribs, styles) {
-		if (!e) {
-			return;
-		}
+	createElementByString: function(str) {
+		let temp = this.createElement('div', null, null, str);
+		return temp.childNodes;
+	},
 
-		e = d3.select(e);
+	setElement: function (el, attribs, styles) {
 		if (attribs) {
-			e.attr(attribs);
-			/*_.each(attribs, function(value, key) {
-			 e.attr(key, value);
-			 });*/
+			_.forEach(attribs, function(value, key) {
+			    el.setAttribute(key, value);
+			 });
 		}
-		if (styles)
-			e.style(styles);
+		if (styles) {
+			_.forEach(styles, function(value, key) {
+				el.style[key] = value;
+			});
+		}
 	},
 
 	testElement: function(node, method) {
@@ -69,45 +72,36 @@ export default {
 	 */
 	getPosition(el, context) {
 		if (!context) context = document.body;
-		var x = 0;
-		var y = 0;
+		let elRect = el.getBoundingClientRect();
+		let contextRect = context.getBoundingClientRect();
 
-		while(el && el != context) {
-			x += (el.offsetLeft - el.scrollLeft + el.clientLeft);
-			y += (el.offsetTop - el.scrollTop + el.clientTop);
-			el = el.offsetParent;
-		}
-		return [x, y];
+		return [elRect.left - contextRect.left, elRect.top - contextRect.top];
+	},
+
+	getCenterPosition(el, context) {
+		if (!context) context = document.body;
+		let elRect = el.getBoundingClientRect();
+		let contextRect = context.getBoundingClientRect();
+		let w = elRect.right - elRect.left;
+		let h = elRect.bottom - elRect.top;
+
+		return [elRect.left - contextRect.left + w/2, elRect.top - contextRect.top + h/2];
 	},
 
 	move: function(el, x, y) {
-		if (!_.isFunction(el.node))
-			el = d3.select(el);
-		if (el.empty()) return;
-		if (x) el.style('left', x + 'px');
-		if (y) el.style('top', y + 'px');
+		if (x) el.style.left = x + 'px';
+		if (y) el.style.top = y + 'px';
 	},
 
-	/*getPosition: function(el) {
-		var offset = $(el).offset();
-		return [offset.left, offset.top];
-	},*/
-
 	getSize: function(el) {
-		if (!_.isFunction(el.node))
-			el = d3.select(el);
-		if (el.empty()) return [0, 0];
-		var w = parseInt(el.style("width"), 10);
-		var h = parseInt(el.style("height"), 10);
+		var w = parseInt(el.style.offsetWidth, 10);
+		var h = parseInt(el.style.offsetHeight, 10);
 		return [w, h];
 	},
 
 	resize: function(el, w, h) {
-		if (!_.isFunction(el.node))
-			el = d3.select(el);
-		if (el.empty()) return;
-		if (w) el.style('width', w + "px");
-		if (h) el.style('height', h + 'px');
+		if (w) el.style.width = w + "px";
+		if (h) el.style.height = h + 'px';
 	},
 
 	preloadImages: function(array) {
@@ -152,4 +146,4 @@ export default {
 		var tagName = e.target.tagName;
 		return (tagName == 'INPUT' || tagName == 'TEXTAREA' || tagName == 'SELECT');
 	}
-};
+}

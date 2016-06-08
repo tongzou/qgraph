@@ -1,8 +1,8 @@
 {
   "name": "qgraph",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "A Graph Manipulation and Visualization Library",
-  "main": "lib/qgraph.js",
+  "main": "dist/qgraph.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tongzou/qgraph.git"
@@ -26,7 +26,10 @@
     "webpack-stream": "^3.1.0"
   },
   "dependencies": {
+    "bean": "^1.0.15",
+    "bonzo": "^2.0.0",
     "d3": "^3.5.16",
-    "lodash": "^4.6.1"
+    "lodash": "^4.6.1",
+    "qwery": "^4.0.0"
   }
 }
