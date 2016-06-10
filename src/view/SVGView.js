@@ -1,3 +1,5 @@
+import _ from "lodash";
+import DomUtils from "../util/DomUtils";
 import GraphView from "./GraphView";
 import StringBuffer from "../util/StringBuffer";
 
@@ -9,16 +11,16 @@ const TEMPLATES = {
 	Rectangle: '<rect x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" rx="9" ry="9"></rect>',
 	Triangle: '<polygon points="${-width/2},${-height/2} ${width/2},${-height/2} 0,${height/2}"></polygon>',
 	Rhombus: '<polygon points="0,${-height/2} ${width/2},0 0,${height/2} ${-width/2},0"></polygon>',
-	hexagon: function(config) {
+	Hexagon: function(config) {
 		var vertical = config.direction == 'north' || config.direction == 'south';
 		if (vertical)
 			return '<polygon points="0,${-height/2} ${width/2},${-height/4} ${width/2},${height/4} 0,${height/2} ${-width/2},${height/4} ${-width/2},${-height/4}"></polygon>';
 		else
 			return '<polygon points="${-width/2},0 ${width/4},${-height/2} ${width/4},${-height/2} ${width/2},0 ${width/4},${height/2} ${-width/4},${height/2}"></polygon>';
 	},
-	path: function(config) {
+	Path: function(config) {
 		var buf = new StringBuffer();
-		buf.append('<path class="sleeper" d="<%=gfw.SVGRenderer.getPathData(data.getPoints())%>"></path>');
+		buf.append('<path class="gauge" d="<%=gfw.SVGRenderer.getPathData(data.getPoints())%>"></path>');
 		buf.append('<path d="<%=gfw.SVGRenderer.getPathData(data.getPoints())%>"');
 		if (config.startArrow != 'none' || config.endArrow != 'none') {
 			buf.append(' style="');
@@ -31,7 +33,7 @@ const TEMPLATES = {
 		buf.append('></path>');
 		return buf.toString();
 	},
-	image: function(config) {
+	Image: function(config) {
 		return '<image x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + config.image + '"></image>';
 	}
 };
@@ -51,6 +53,22 @@ class SVGView extends GraphView {
 			buf.append('</svg>');
 			this.box.innerHTML = buf.toString();
 		}
+	}
+
+	static appendContent(el, content) {
+
+	}
+
+	static setContent(el, content) {
+		if (DomUtils.isIE) {
+			let buf = new StringBuffer();
+			buf.append('<svg>').append(content).append('</svg');
+			let temp = DomUtils.createElement('div', null, null, buf.toString()).firstElementChild;
+
+			while (temp.firstChild)
+				el.appendChild(temp.firstChild);
+		} else
+			el.innerHTML = content;
 	}
 }
 

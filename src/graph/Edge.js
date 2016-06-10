@@ -72,6 +72,7 @@ class Edge extends Element {
 	}
 
 	/**
+	 *
 	 * Return the total length of this connection, in pixels.
 	 */
 	getLength() {

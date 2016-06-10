@@ -3,7 +3,7 @@ import Rectangle from "./Rectangle";
 let registry = {};
 
 class Shape {
-	constructor(x, y, width, height) {
+	constructor(x = 0, y = 0, width = 0, height = 0) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -37,9 +37,14 @@ class Shape {
 	/**
 	 * This will generate n ports on the shape.
 	 */
-	getRegularPoints(n) {
-		return null;
-	}
+	getRegularPoints(n) {return null;}
+
+	/**
+	 * Get the intersection between boundary of this shape and the line connecting (x,y) with the refPt.
+	 * @param refPt
+	 * @returns {null}
+	 */
+	getPerimeter(refPt, orthogonal = false) { return null; }
 
 	static getShape(name) {
 		return registry[name];

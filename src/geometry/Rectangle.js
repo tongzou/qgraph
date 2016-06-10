@@ -3,6 +3,64 @@ import Point from "./Point";
 import Shape from "./Shape";
 
 export default class Rectangle extends Shape {
+	getPerimeter(refPt, orthogonal) {
+		return Rectangle.getPerimeter(this, refPt, orthogonal);
+	}
+
+	static getPerimeter(rect, pt, orthogonal = false) {
+		var x = rect.x;
+		var y = rect.y;
+		var dx = pt.x - x;
+		var dy = pt.y - y;
+		var alpha = Math.atan2(y, x);
+		var p = new Point(0, 0);
+		var pi = Math.PI;
+		var pi2 = Math.PI/2;
+		var beta = pi2 - alpha;
+		var t = Math.atan2(rect.height, rect.width);
+
+		if (alpha < -pi + t || alpha > pi - t) {
+			// Left edge
+			p.x = rect.left;
+			p.y = y - rect.width * Math.tan(alpha) / 2;
+		} else if (alpha < -t) {
+			// Top Edge
+			p.y = rect.top;
+			p.x = x - rect.height * Math.tan(beta) / 2;
+		} else if (alpha < t) {
+			// Right Edge
+			p.x = rect.right;
+			p.y = y + rect.width * Math.tan(alpha) / 2;
+		} else {
+			// Bottom Edge
+			p.y = rect.bottom;
+			p.x = x + rect.height * Math.tan(beta) / 2;
+		}
+
+		if (orthogonal) {
+			if (pt.x >= rect.left &&
+				pt.x <= rect.right) {
+				p.x = pt.x;
+			} else if (pt.y >= rect.top &&
+				pt.y <= rect.bottom) {
+				p.y = pt.y;
+			}
+
+			if (pt.x < rect.left) {
+				p.x = rect.left;
+			} else if (pt.x > rect.right) {
+				p.x = rect.right;
+			}
+
+			if (pt.y < rect.top) {
+				p.y = rect.top;
+			} else if (pt.y > rect.bottom) {
+				p.y = rect.bottom;
+			}
+		}
+
+		return p;
+	}
 
 	/**
 	 * Return the bounding rectangle that contains p1 and p2

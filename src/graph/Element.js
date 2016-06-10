@@ -2,6 +2,7 @@ import _ from "lodash";
 import Utils from "../util/Utils";
 import Cache from "../util/Cache";
 import StringBuffer from "../util/StringBuffer";
+import Shape from "../geometry/Shape";
 import Rectangle from "../geometry/Rectangle";
 import Label from "../view/Label";
 
@@ -70,32 +71,29 @@ export default class Element {
 	 * @returns {{key: (string|*), className: *, namespace: *, bounds: *}}
 	 */
 	getView(key) {
-		let bounds = this.getBounds(key);
-		return {
+		let shape = this.getShape(key);
+		return _.assign({
 			id: this.id,
 			key: key,
 			className: this.computedClassName,
 			namespace: this.namespace,
-			x: bounds.x,
-			y: bounds.y,
-			width: bounds.width,
-			height: bounds.height,
 			scale: this.viewProp(key, 'scale') || 1.0
-		}
+		}, shape);
 	}
 
-	getBounds(key) {
-		let bounds = Cache.get(this.id + ".bounds", key);
-		if (bounds) return bounds;
+	getShape(key) {
+		let shape = Cache.get(this.id + ".shape", key);
+		if (shape) return shape;
 
-		let shape = this.viewProp(key, 'shape');
-		let x = this.viewProp(key, "x") || 0;
-		let y = this.viewProp(key, "y") || 0;
-		let w = this.viewProp(key, "width") || (shape ? shape.width : 0);
-		let h = this.viewProp(key, "height") || (shape ? shape.height : 0);
-		bounds = new Rectangle(x, y, w, h);
-		Cache.set(this.id + '.bounds', bounds, key);
-		return bounds;
+		let shapeConfig = this.viewProp(key, 'shape');
+		let shapeClass = shapeConfig ? Shape.getShape(shapeConfig.name) : Shape.getShape('Rectangle');
+		let x = this.viewProp(key, "x");
+		let y = this.viewProp(key, "y");
+		let width = this.viewProp(key, "width") || (shapeConfig ? shapeConfig.width: 0);
+		let height = this.viewProp(key, "height") || (shapeConfig ? shapeConfig.height: 0);
+		shape = new shapeClass(x, y, width, height);
+		Cache.set(this.id + '.shape', shape, key);
+		return shape;
 	}
 
 	render(view) {
@@ -132,9 +130,9 @@ export default class Element {
 	getLabelBox(key) {
 		let box = Cache.get(this.id + '.labelBox', key);
 		if (box) return box;
-		let bounds = this.getBounds(key);
+		let shape = this.getShape(key);
 		// Just get the config will have a positive performance boost for IE11 and IE10.
-		box = Label.getLabelBox(this.prop('label'), bounds.width, bounds.height, this.viewProp(key, 'labelConfig'));
+		box = Label.getLabelBox(this.prop('label'), shape.width, shape.height, this.viewProp(key, 'labelConfig'));
 		Cache.set(this.id + '.labelBox', box, key);
 		return box;
 	}

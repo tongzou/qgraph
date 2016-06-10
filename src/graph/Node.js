@@ -9,6 +9,7 @@ class Node extends Element {
 
 		this.inEdges = [];
 		this.outEdges = [];
+		this.ports = null;
 		this.parent = null;
 	}
 
@@ -57,6 +58,15 @@ class Node extends Element {
 			return buf.toString();
 		}
 		return '';
+	}
+
+	getPort(key, portName = 'auto', endPt) {
+		let shape = this.getShape(key), pt;
+		if (portName == 'auto') {
+			pt = shape.getPerimeter(endPt);
+			return pt;
+		}
+		return null;
 	}
 
 	toString() {
