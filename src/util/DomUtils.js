@@ -4,21 +4,19 @@ import _ from "lodash";
  * dom Utility functions
  */
 export default {
-	isIE: (function() {
-		let isIE = false, version = null, window = window || {}, navigator = navigator || {userAgent: ""};
-		if (Object.hasOwnProperty.call(window, "ActiveXObject") && !window.ActiveXObject) {
-			isIE = true;
-			version = 11;
-		} else {
-			var myNav = navigator.userAgent.toLowerCase();
-			isIE = myNav.indexOf('msie') != -1;
-			if (isIE)
-				version = parseInt(myNav.split('msie')[1]);
-		}
+	isIE: (function () {
+		var sAgent = window.navigator.userAgent;
+		var Idx = sAgent.indexOf("MSIE");
 
-		return function() {
-			return isIE ? version : false;
-		};
+		// If IE, return version number.
+		if (Idx > 0)
+			return parseInt(sAgent.substring(Idx + 5, sAgent.indexOf(".", Idx)));
+
+		// If IE 11 then look for Updated user agent string.
+		else if (!!navigator.userAgent.match(/Trident\/7\./))
+			return 11;
+		else
+			return false;
 	})(),
 
 	isFireFox : (function(){

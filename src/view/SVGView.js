@@ -56,19 +56,25 @@ class SVGView extends GraphView {
 	}
 
 	static appendContent(el, content) {
+		let buf = new StringBuffer();
+		buf.append('<svg>').append(content).append('</svg');
+		let temp = DomUtils.createElement('div', null, null, buf.toString()).firstElementChild;
 
+		while (temp.firstChild)
+			el.appendChild(temp.firstChild);
+		return el;
 	}
 
 	static setContent(el, content) {
 		if (DomUtils.isIE) {
-			let buf = new StringBuffer();
-			buf.append('<svg>').append(content).append('</svg');
-			let temp = DomUtils.createElement('div', null, null, buf.toString()).firstElementChild;
-
-			while (temp.firstChild)
-				el.appendChild(temp.firstChild);
+			// empty el first.
+			let child;
+			while (child = el.lastChild)
+				el.removeChild(child);
+			SVGView.appendContent(el, content);
 		} else
 			el.innerHTML = content;
+		return el;
 	}
 }
 
