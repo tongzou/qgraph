@@ -22,8 +22,6 @@ class GraphView {
 		this.dispatcher = null;
 		Utils.initConfig(this, config);
 
-		// A object for storing template strings.
-		this.templateStore = {};
 		Events.on(Label.editor, 'editor.update.*', function(key, value) {
 			console.log(key + '=' + value);
 		});
@@ -151,6 +149,18 @@ class GraphView {
 		return true;
 	}
 
+	renderLabel(box) {
+		return this.constructor.renderLabel(box);
+	}
+
+	renderLink(shape) {
+		return this.constructor.renderLink(shape);
+	}
+
+	renderMarkers(markers) {
+		return this.constructor.renderMarkers(markers);
+	}
+
 	/**
 	 * Get the template for the specified key.
 	 * @param key
@@ -160,7 +170,7 @@ class GraphView {
 	 * @returns {*}
 	 */
 	getTemplate(key, config, preprocessor) {
-		var t = this.templateStore[key];
+		var t = this.constructor.TEMPLATES[key];
 		if (t && _.isFunction(t)) {
 			t = t(config);
 		}

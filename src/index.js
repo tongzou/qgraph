@@ -16,6 +16,8 @@ import Edge from "./graph/Edge";
 import Layout from "./layout/Layout";
 import FlowLayout from "./layout/FlowLayout";
 import Label from "./view/Label";
+import Link from "./view/Link";
+import Marker from "./view/Marker";
 import GraphView from "./view/GraphView";
 import SVGView from "./view/SVGView";
 
@@ -35,6 +37,8 @@ export default {
 	Ellipse,
 	EventDispatcher,
 	Label,
+	Link,
+	Marker,
 	Graph,
 	Element,
 	Node,

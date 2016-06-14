@@ -18,9 +18,10 @@
 <input type="button" value="Start Dispatcher" onclick="enableDispatcher(true)"/>
 <input type="button" value="Stop Dispatcher" onclick="enableDispatcher(false)"/>
 <div id="graph-demo" style="position:absolute;left:20px;right:20px;top:20px;bottom:20px;margin-top:50px">
-	<div ns="root.node" data="node1" style="position:absolute;left:100px;top:100px;background-color:#0e72b5; width:120px; height:60px"><div ns="label">my label1</div></div>
+	<!--div ns="root.node" data="node1" style="position:absolute;left:100px;top:100px;background-color:#0e72b5; width:120px; height:60px"><div ns="label">my label1</div></div>
 
 	<div ns="root.node" data="node2" style="position:absolute;left:300px;top:100px;background-color:#0e72b5; width:120px; height:60px"><div ns="label">my label2</div></div>
+	-->
 </div>
 <script type="text/javascript">
 var qg = window["qgraph"].default;
@@ -77,10 +78,10 @@ var viewConfig = {
 
 var model = {
     nodes: [
-	    {type:'Assignment', label:'simpleFlow1', id:'ASSIGNMENT63', x:100, y:100},
+	    {type:'Assignment', label:'simpleFlow1', id:'ASSIGNMENT63', x:100, y:150},
 	    {type:'Assignment', label:'[Utility]', id:'Utility2', x:100, y:300},
-	    {type:'Start', label:'', id:'Start1', x:300, y:100},
-	    {type:'End', label:'', id:'END52', x:500, y:100}
+	    {type:'Start', label:'', id:'Start1', x:300, y:500},
+	    {type:'End', label:'', id:'END52', x:500, y:60}
     ],
 	edges: [
 		{from: 'Start1', to:'ASSIGNMENT63'},

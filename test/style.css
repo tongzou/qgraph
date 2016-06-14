@@ -21,3 +21,9 @@
     stroke-width: 2;
 }
 
+.edge {
+    fill: none;
+    stroke: rgb(134, 142, 142);
+    stroke-width: 1;
+    stroke-miterlimit: 10;
+}

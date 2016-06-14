@@ -1,13 +1,16 @@
+import _ from "lodash";
+import Point from "./Point";
 import Rectangle from "./Rectangle";
 
 let registry = {};
 
 class Shape {
-	constructor(x = 0, y = 0, width = 0, height = 0) {
+	constructor(x, y, width, height, config) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		_.defaults(this, config, {x: 0, y: 0, width: 0, height: 0});
 	}
 
 	/**
@@ -30,6 +33,8 @@ class Shape {
 	 */
 	get right() { return this.x + this.width/2; }
 
+	get center() { return new Point(this.x, this.y); }
+
 	get bounds() { return new Rectangle(this.x, this.y, this.width, this.height); }
 
 	contains(el) { return false; }
@@ -44,7 +49,14 @@ class Shape {
 	 * @param refPt
 	 * @returns {null}
 	 */
-	getPerimeter(refPt, orthogonal = false) { return null; }
+	getPerimeter(refPt, orthogonal = false) {
+		return this.constructor.getPerimeter(this, refPt, orthogonal);
+	}
+
+	render(view) {
+		let template = _.template(view.getTemplate(this.constructor.name, this));
+		return template(this);
+	}
 
 	static getShape(name) {
 		return registry[name];

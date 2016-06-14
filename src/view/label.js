@@ -6,25 +6,6 @@ import StringBuffer from "../util/StringBuffer";
 import Rectangle from "../geometry/Rectangle";
 
 const FONT_BOLD = 1, FONT_ITALIC = 2, FONT_UNDERLINE = 4, FONT_SHADOW = 8;
-const SVG_TEMPLATE_STR = `
-<% var box = _.has(data, "dx") ? data : (data.getLabelBox ? data.getLabelBox() : null); 
-   if (box) {%>
-	<g <% if (box.config && box.config.class) {%>class="<%=box.config.class%>"<%}%>\
-		<% if (box.config && box.config.ns) {%>ns="<%=box.config.ns%>"<%}%>\
-		text-anchor="<%=box.anchor%>"\
-		transform="translate(<%=box.bounds.x%>,<%=box.bounds.y%>)">
-	<% if (box.backgroundColor) {%>
-		<rect x="<%=-box.bounds.width/2%>" y="<%=-box.bounds.height/2%>" width="<%=box.bounds.width%>" height="<%=box.bounds.height%>" fill="<%=box.backgroundColor%>"/>
-	<% } if (_.isArray(box.label)) { 
-		_.each(box.label, function(value, line) {%>
-			<text <% if (box.config && box.config.textStyle) {%>style="<%=box.config.textStyle%>"<%}%>\
-				dx="<%=box.dx%>" dy="<%=box.dy + box.lineHeight * line%>"><%=value%></text>
-		<%});} else { %>
-			<text><%=box.label%></text>
-		<%}%>
-	</g>
-<%}%>`.trim();
-const SVG_TEMPLATE = _.template(SVG_TEMPLATE_STR, {variable: "data"});
 
 let defaultConfig = {
 	fontSize: 11,
@@ -187,7 +168,7 @@ export default (function() {
 	 * }
 	 * @returns {*}
 	 */
-	function getLabelBox(label, containerWidth, containerHeight, labelConfig) {
+	function getLabelBox(label, containerWidth, containerHeight, labelConfig = {}) {
 		labelConfig = _.defaultsDeep(labelConfig, defaultConfig);
 		let fontSize = labelConfig.fontSize;
 		let fontFamily = labelConfig.fontFamily;
@@ -275,6 +256,10 @@ export default (function() {
 		};
 	}
 
+	function render(view, box) {
+		return view.renderLabel(box);
+	}
+
 	let editor = {
 		visible: function() { return this.input && this.input.style.visibility == 'visible'; },
 
@@ -342,12 +327,11 @@ export default (function() {
 		FONT_ITALIC,
 		FONT_UNDERLINE,
 		FONT_SHADOW,
-		SVG_TEMPLATE_STR,
-		SVG_TEMPLATE,
 		getStringSize,
 		wrap,
 		getLabelBox,
 		getLabelBoxForEdge,
+		render,
 		editor
 	};
 })();

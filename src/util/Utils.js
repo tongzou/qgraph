@@ -10,12 +10,12 @@ let _debugging = [], _debugAll = false, typeRegistry = {}, splice = Array.splice
 export default {
 	type: function(namespace, name, type) {
 		if (!typeRegistry[namespace])
-			typeRegistry[namespace] = {};
+			typeRegistry[namespace] = new Map();
 		if (!name)
 			return typeRegistry[namespace];
 		if (!type)
-			return typeRegistry[namespace][name];
-		typeRegistry[namespace][name] = type;
+			return typeRegistry[namespace].get(name);
+		typeRegistry[namespace].set(name, type);
 	},
 
 	createType: function(namespace, props, defaultType) {

@@ -2,6 +2,7 @@ import _ from "lodash";
 import Utils from "../util/Utils";
 import Node from "./Node";
 import Edge from "./Edge";
+import Marker from "../view/Marker";
 
 const nodeDefaults = {
 	name: 'Default',
@@ -19,7 +20,19 @@ const edgeDefaults = {
 	name: 'Default',
 	role: 'edge',
 	selectable: true,
-	visible: true
+	visible: true,
+	shape: {
+		name: "Link"
+	},
+	startMarker: null,
+	endMarker: {
+		id: 'Default_EndMarker',
+		type: 'block',
+		size: 10
+	},
+	/* start and end is only used if the edge is not connected to a node */
+	start: [0, 0],
+	end: [400, 200]
 };
 
 class Graph {
@@ -34,6 +47,21 @@ class Graph {
 
 		Utils.buildTypes(config.nodeTypes, "Nodes", nodeDefaults);
 		Utils.buildTypes(config.edgeTypes, "Edges", edgeDefaults);
+		// check for markers.
+		this.markers = [];
+		let edgeTypes = Utils.type(Edge.namespace), marker, markerConfig;
+		for (let type of edgeTypes.entries()) {
+			markerConfig = type[1].prototype.startMarker;
+			if (markerConfig) {
+				marker = Marker.getMarker(markerConfig, true);
+				this.markers.push(marker);
+			}
+			markerConfig = type[1].prototype.endMarker;
+			if (markerConfig) {
+				marker = Marker.getMarker(markerConfig, false);
+				this.markers.push(marker);
+			}
+		}
 
 		delete config.nodeTypes;
 		delete config.edgeTypes;

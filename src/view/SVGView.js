@@ -3,56 +3,81 @@ import DomUtils from "../util/DomUtils";
 import GraphView from "./GraphView";
 import StringBuffer from "../util/StringBuffer";
 
-const TEMPLATES = {
-	$root: '<g id="${id}" class="${className}" ns="graph" transform="translate(${x},${y})scale(${scale})">#{children}</g>',
-	$node: '<g id="${id}" class="${className}" ns="${namespace}" transform="translate(${x},${y})">#{shape}#{label}</g>',
-	$edge: '<g id="${id}" class="${className}" ns="${namespace}">#{shape}</g>',
-	Ellipse: '<ellipse cx="0" cy="0" rx="${width/2}" ry="${height/2}"></ellipse>',
-	Rectangle: '<rect x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" rx="9" ry="9"></rect>',
-	Triangle: '<polygon points="${-width/2},${-height/2} ${width/2},${-height/2} 0,${height/2}"></polygon>',
-	Rhombus: '<polygon points="0,${-height/2} ${width/2},0 0,${height/2} ${-width/2},0"></polygon>',
-	Hexagon: function(config) {
-		var vertical = config.direction == 'north' || config.direction == 'south';
-		if (vertical)
-			return '<polygon points="0,${-height/2} ${width/2},${-height/4} ${width/2},${height/4} 0,${height/2} ${-width/2},${height/4} ${-width/2},${-height/4}"></polygon>';
-		else
-			return '<polygon points="${-width/2},0 ${width/4},${-height/2} ${width/4},${-height/2} ${width/2},0 ${width/4},${height/2} ${-width/4},${height/2}"></polygon>';
-	},
-	Path: function(config) {
-		var buf = new StringBuffer();
-		buf.append('<path class="gauge" d="<%=gfw.SVGRenderer.getPathData(data.getPoints())%>"></path>');
-		buf.append('<path d="<%=gfw.SVGRenderer.getPathData(data.getPoints())%>"');
-		if (config.startArrow != 'none' || config.endArrow != 'none') {
-			buf.append(' style="');
-			if (config.startArrow != 'none')
-				buf.append('marker-start: url(#<%=data.type.name%>_StartArrow);');
-			if (config.endArrow != 'none')
-				buf.append('marker-end: url(#<%=data.type.name%>_EndArrow);');
-			buf.append('"');
-		}
-		buf.append('></path>');
-		return buf.toString();
-	},
-	Image: function(config) {
-		return '<image x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + config.image + '"></image>';
-	}
-};
-
 class SVGView extends GraphView {
-	constructor(id, container, config) {
-		super(id, container, config);
-		_.assign(this.templateStore, TEMPLATES);
-	}
-
 	render() {
 		let result = super.render();
 		if (result) {
 			var root = this._graph.getCurrentRoot();
 			var buf = new StringBuffer('<svg width="100%" height="100%">');
+			buf.append(this.renderDefs());
 			buf.append(root.render(this));
 			buf.append('</svg>');
 			this.box.innerHTML = buf.toString();
 		}
+	}
+
+	renderDefs() {
+		let buf = new StringBuffer('<defs>');
+		buf.append(this.getTemplate('Grid', this.prop("gridSize")));
+		let markers = this.graph().markers;
+		if (markers.length > 0)
+			buf.append(SVGView.renderMarkers(markers));
+		buf.append('</defs>');
+		return buf.toString();
+	}
+
+	static renderMarkers(markers) {
+		let buf = new StringBuffer(), str1, str2;
+		for (let marker of markers) {
+			str1 = this.TEMPLATES['Marker'](marker);
+			str2 = marker.shape;
+			if (!_.isString(str2))
+				str2 = this.renderShape(str2);
+			str1 = str1.replace(/\#\{shape\}/, str2);
+			buf.append(str1);
+		}
+		return buf.toString();
+	}
+
+	static renderLabel(box) {
+		return this.TEMPLATES['Label'](box);
+	}
+
+	static renderShape(shape) {
+		let template = this.TEMPLATES[shape.name];
+		if (_.isString(template))
+			template = _.template(template);
+		return template(shape);
+	}
+
+	static renderLink(shape) {
+		let points = shape.points;
+		if (!points || points.length == 0) return '';
+
+		let buf = new StringBuffer('M'), point;
+		for (let i = 0; i < points.length; i++) {
+			point = points[i];
+			if (i == 0)
+				buf.append(point.x).append(',').append(point.y);
+			else
+				buf.append(' L').append(point.x).append(',').append(point.y);
+		}
+		let d = buf.toString();
+		buf.clear();
+		if (shape.config && shape.config.showGauge)
+			buf.append('<path style="stroke: white; stroke-width: 9; visibility: hidden; pointer-events: stroke;" d="')
+				.append(d).append('"/>');
+		buf.append('<path d="').append(d).append('"');
+		if (shape.startMarker || shape.endMarker) {
+			buf.append(' style="');
+			if (shape.startMarker)
+				buf.append('marker-start: url(#').append(_.isString(shape.startMarker) ? shape.startMarker : shape.startMarker.id).append(');');
+			if (shape.endMarker)
+				buf.append('marker-end: url(#').append(_.isString(shape.endMarker) ? shape.endMarker : shape.endMarker.id).append(');');
+			buf.append('"');
+		}
+		buf.append('/>');
+		return buf.toString();
 	}
 
 	static appendContent(el, content) {
@@ -77,5 +102,67 @@ class SVGView extends GraphView {
 		return el;
 	}
 }
+SVGView.TEMPLATES = {
+	$root: '<g id="${id}" class="${className}" ns="graph" transform="translate(${x},${y})scale(${scale})">#{children}</g>',
+	$node: '<g id="${id}" class="${className}" ns="${namespace}" transform="translate(${x},${y})">#{shape}#{label}</g>',
+	$edge: '<g id="${id}" class="${className}" ns="${namespace}">#{shape}</g>',
+	Ellipse: '<ellipse cx="0" cy="0" rx="${width/2}" ry="${height/2}"/>',
+	Rectangle: '<rect x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" rx="9" ry="9"/>',
+	Triangle: '<polygon points="${-width/2},${-height/2} ${width/2},${-height/2} 0,${height/2}"/>',
+	Rhombus: '<polygon points="0,${-height/2} ${width/2},0 0,${height/2} ${-width/2},0"/>',
+	Hexagon: function(config) {
+		var vertical = config.direction == 'north' || config.direction == 'south';
+		if (vertical)
+			return '<polygon points="0,${-height/2} ${width/2},${-height/4} ${width/2},${height/4} 0,${height/2} ${-width/2},${height/4} ${-width/2},${-height/4}"/>';
+		else
+			return '<polygon points="${-width/2},0 ${width/4},${-height/2} ${width/4},${-height/2} ${width/2},0 ${width/4},${height/2} ${-width/4},${height/2}"/>';
+	},
+	Polygon: function(shape) {
+		let buf = new StringBuffer('<polygon points="');
+		for (let pt of shape.points)
+			buf.append(pt[0]).append(',').append(pt[1]).append(' ');
+		buf.removeLast();
+		buf.append('"/>');
+		return buf.toString();
+	},
+	Image: function(config) {
+		return '<image x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="' + config.image + '"/>';
+	},
+	Marker: function(marker) {
+		return `
+<marker id="${marker.id}" markerWidth="${marker.size}" markerHeight="${marker.size}" refx="${marker.ref[0]}" 
+refy="${marker.ref[1]}" orient="auto" viewbox="${marker.viewBox.x} ${marker.viewBox.y} ${marker.viewBox.width} ${marker.viewBox.height}"
+markerUnits="userSpaceOnUse" ${marker.fill ? style="fill:${marker.fill}" : ''}>#{shape}</marker>
+`.trim();
+	},
+	Grid: function(size) {
+		return `
+<pattern id="GridPattern" width="${size}" height="${size}" patternUnits="userSpaceOnUse">
+	<ellipse cx="0" cy="0" rx="1" ry="1" fill="#999999"/>
+	<ellipse cx="0" cy="${size}" rx="1" ry="1" fill="#999999"/>
+	<ellipse cx="${size}" cy="0" rx="1" ry="1" fill="#999999"/>
+	<ellipse cx="${size}" cy="${size}" rx="1" ry="1" fill="#999999"/>
+</pattern>`.trim();
+	},
+	Label: _.template(`
+<% var box = _.has(data, "dx") ? data : (data.getLabelBox ? data.getLabelBox() : null); 
+   if (box) {%>
+	<g <% if (box.config && box.config.class) {%>class="<%=box.config.class%>"<%}%>\
+		<% if (box.config && box.config.ns) {%>ns="<%=box.config.ns%>"<%}%>\
+		text-anchor="<%=box.anchor%>"\
+		transform="translate(<%=box.bounds.x%>,<%=box.bounds.y%>)">
+	<% if (box.backgroundColor) {%>
+		<rect x="<%=-box.bounds.width/2%>" y="<%=-box.bounds.height/2%>" width="<%=box.bounds.width%>" height="<%=box.bounds.height%>" fill="<%=box.backgroundColor%>"/>
+	<% } if (_.isArray(box.label)) { 
+		_.each(box.label, function(value, line) {%>
+			<text <% if (box.config && box.config.textStyle) {%>style="<%=box.config.textStyle%>"<%}%>\
+				dx="<%=box.dx%>" dy="<%=box.dy + box.lineHeight * line%>"><%=value%></text>
+		<%});} else { %>
+			<text><%=box.label%></text>
+		<%}%>
+	</g>
+<%}%>
+`.trim(), {variable: "data"})
+};
 
 export default SVGView;

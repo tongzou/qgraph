@@ -89,9 +89,9 @@ export default class Element {
 		let shapeClass = shapeConfig ? Shape.getShape(shapeConfig.name) : Shape.getShape('Rectangle');
 		let x = this.viewProp(key, "x");
 		let y = this.viewProp(key, "y");
-		let width = this.viewProp(key, "width") || (shapeConfig ? shapeConfig.width: 0);
-		let height = this.viewProp(key, "height") || (shapeConfig ? shapeConfig.height: 0);
-		shape = new shapeClass(x, y, width, height);
+		let width = this.viewProp(key, "width");
+		let height = this.viewProp(key, "height");
+		shape = new shapeClass(x, y, width, height, shapeConfig);
 		Cache.set(this.id + '.shape', shape, key);
 		return shape;
 	}
@@ -110,11 +110,9 @@ export default class Element {
 	}
 
 	renderShape(view) {
-		let shape = this.prop('shape');
-		if (shape) {
-			let template = _.template(view.getTemplate(shape.name, shape));
-			return template(this.getView(view.id));
-		}
+		let shape = this.getShape(view.id);
+		if (shape)
+			return shape.render(view);
 		return '';
 	}
 
@@ -123,7 +121,7 @@ export default class Element {
 			return null;
 		let box = this.getLabelBox(view.id);
 		if (box)
-			return Label.SVG_TEMPLATE(box);
+			return view.renderLabel(box);
 		return '';
 	}
 
