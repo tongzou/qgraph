@@ -27,7 +27,7 @@ const edgeDefaults = {
 	startMarker: null,
 	endMarker: {
 		id: 'Default_EndMarker',
-		type: 'block',
+		type: 'arrow',
 		size: 10
 	},
 	/* start and end is only used if the edge is not connected to a node */

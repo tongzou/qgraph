@@ -5,7 +5,7 @@ let registry = {};
 let Marker = (function() {
 
 	/** Begin Standard Marker Type **/
-	function classic(size, source, styles) {
+	function arrow(size, source, styles) {
 		var sign = source ? -1 : 1;
 		var marker = {
 			viewBox: new Rectangle(-5, -5, 10, 10),
@@ -20,7 +20,7 @@ let Marker = (function() {
 		return marker;
 	}
 
-	function block(size, source, styles) {
+	function triangle(size, source, styles) {
 		var sign = source ? -1 : 1;
 		var marker = {
 			viewBox: new Rectangle(-5, -5, 10, 10),
@@ -66,8 +66,8 @@ let Marker = (function() {
 		return marker;
 	}
 
-	registry['classic'] = classic;
-	registry['block'] = block;
+	registry['arrow'] = arrow;
+	registry['triangle'] = triangle;
 	registry['oval'] = oval;
 	registry['diamond'] = diamond;
 

@@ -132,7 +132,7 @@ SVGView.TEMPLATES = {
 		return `
 <marker id="${marker.id}" markerWidth="${marker.size}" markerHeight="${marker.size}" refx="${marker.ref[0]}" 
 refy="${marker.ref[1]}" orient="auto" viewbox="${marker.viewBox.x} ${marker.viewBox.y} ${marker.viewBox.width} ${marker.viewBox.height}"
-markerUnits="userSpaceOnUse" ${marker.fill ? style="fill:${marker.fill}" : ''}>#{shape}</marker>
+markerUnits="userSpaceOnUse" ${marker.fill ? `style="fill:${marker.fill}"` : ''}>#{shape}</marker>
 `.trim();
 	},
 	Grid: function(size) {
@@ -150,7 +150,7 @@ markerUnits="userSpaceOnUse" ${marker.fill ? style="fill:${marker.fill}" : ''}>#
 	<g <% if (box.config && box.config.class) {%>class="<%=box.config.class%>"<%}%>\
 		<% if (box.config && box.config.ns) {%>ns="<%=box.config.ns%>"<%}%>\
 		text-anchor="<%=box.anchor%>"\
-		transform="translate(<%=box.bounds.x%>,<%=box.bounds.y%>)">
+		transform="translate(<%=box.bounds.x%>,<%=box.bounds.y%>)<% if (box.config && box.config.rotation) {%>rotate(<%=box.config.rotation%> <%=box.pivot[0]%> <%=box.pivot[1]%>)<%}%>">
 	<% if (box.backgroundColor) {%>
 		<rect x="<%=-box.bounds.width/2%>" y="<%=-box.bounds.height/2%>" width="<%=box.bounds.width%>" height="<%=box.bounds.height%>" fill="<%=box.backgroundColor%>"/>
 	<% } if (_.isArray(box.label)) { 
