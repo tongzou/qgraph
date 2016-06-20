@@ -8,6 +8,7 @@ import Line from "./geometry/Line";
 import Shape from "./geometry/Shape";
 import Rectangle from "./geometry/Rectangle";
 import Ellipse from "./geometry/Ellipse";
+import Link from "./geometry/Link";
 import EventDispatcher from "./event/EventDispatcher";
 import Graph from "./graph/Graph";
 import Element from "./graph/Element";
@@ -16,10 +17,9 @@ import Edge from "./graph/Edge";
 import Layout from "./layout/Layout";
 import FlowLayout from "./layout/FlowLayout";
 import Label from "./view/Label";
-import Link from "./view/Link";
 import Marker from "./view/Marker";
-import GraphView from "./view/GraphView";
-import SVGView from "./view/SVGView";
+import Renderer from "./view/Renderer";
+import SVGRenderer from "./view/SVGRenderer";
 
 Shape.addShape("Rectangle", Rectangle);
 Shape.addShape("Ellipse", Ellipse);
@@ -35,9 +35,9 @@ export default {
 	Shape,
 	Rectangle,
 	Ellipse,
+	Link,
 	EventDispatcher,
 	Label,
-	Link,
 	Marker,
 	Graph,
 	Element,
@@ -45,6 +45,6 @@ export default {
 	Edge,
 	Layout,
 	FlowLayout,
-	GraphView,
-	SVGView
+	Renderer,
+	SVGRenderer
 };

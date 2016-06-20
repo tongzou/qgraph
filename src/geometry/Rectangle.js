@@ -49,9 +49,9 @@ export default class Rectangle extends Shape {
 	 * @return int the side of the intersection: -1: no intersection, 0: left, 1: top, 2: right, 3: bottom, 4: containment.
 	 */
 	detectIntersection(pt1, pt2) {
-		var horizontal = pt1.y == pt2.y;
-		var contains1 = this.contains(pt1);
-		var contains2 = this.contains(pt2);
+		let horizontal = pt1.y == pt2.y;
+		let contains1 = this.contains(pt1);
+		let contains2 = this.contains(pt2);
 		if (contains1 && contains2) return 4;
 		if (!contains1 && !contains2) {
 			if (horizontal && (pt1.y >= this.top && pt1.y <= this.bottom)) {
@@ -69,7 +69,7 @@ export default class Rectangle extends Shape {
 			return -1;
 		}
 
-		var outPt = contains1 ? pt2 : pt1;
+		let outPt = contains1 ? pt2 : pt1;
 		if (horizontal) {
 			if (outPt.x > this.right)
 				return 2;
@@ -86,16 +86,16 @@ export default class Rectangle extends Shape {
 	}
 
 	static getPerimeter(rect, pt, orthogonal = false) {
-		var x = rect.x;
-		var y = rect.y;
-		var dx = pt.x - x;
-		var dy = pt.y - y;
-		var alpha = Math.atan2(dy, dx);
-		var p = new Point(0, 0);
-		var pi = Math.PI;
-		var pi2 = Math.PI/2;
-		var beta = pi2 - alpha;
-		var t = Math.atan2(rect.height, rect.width);
+		let x = rect.x;
+		let y = rect.y;
+		let dx = pt.x - x;
+		let dy = pt.y - y;
+		let alpha = Math.atan2(dy, dx);
+		let p = new Point(0, 0);
+		let pi = Math.PI;
+		let pi2 = Math.PI/2;
+		let beta = pi2 - alpha;
+		let t = Math.atan2(rect.height, rect.width);
 
 		if (alpha < -pi + t || alpha > pi - t) {
 			// Left edge
@@ -137,7 +137,8 @@ export default class Rectangle extends Shape {
 			}
 		}
 
-		return p;
+		let dir = Rectangle.getDirection(rect, p, orthogonal);
+		return {point: p, direction: dir};
 	}
 
 	/**
@@ -148,10 +149,10 @@ export default class Rectangle extends Shape {
 		margin = margin || [0, 0, 0, 0];
 		if (!_.isArray(margin))
 			margin = [margin, margin, margin, margin];
-		var min = [pts[0].x, pts[0].y];
-		var max = [pts[0].x, pts[0].y];
-		for (var i = 1; i < pts.length; i++) {
-			var p = pts[i];
+		let min = [pts[0].x, pts[0].y];
+		let max = [pts[0].x, pts[0].y];
+		for (let i = 1; i < pts.length; i++) {
+			let p = pts[i];
 			if (p.x < min[0]) {
 				min[0] = p.x;
 			}
@@ -169,8 +170,8 @@ export default class Rectangle extends Shape {
 		min[1] = min[1] - margin[1];
 		max[0] = max[0] + margin[2];
 		max[1] = max[1] + margin[3];
-		var w = Math.abs(max[0] - min[0]);
-		var h = Math.abs(max[1] - min[1]);
+		let w = Math.abs(max[0] - min[0]);
+		let h = Math.abs(max[1] - min[1]);
 		return new Rectangle(min[0] + w/2, min[1] + h/2, w, h);
 	}
 
@@ -179,7 +180,7 @@ export default class Rectangle extends Shape {
 	 * @param rects
 	 */
 	static union(rects) {
-		var minx = null, miny = null, maxx = -Infinity, maxy = -Infinity;
+		let minx = null, miny = null, maxx = -Infinity, maxy = -Infinity;
 		_.each(rects, function (rect) {
 			minx = minx || rect.x;
 			miny = miny || rect.y;
@@ -191,5 +192,40 @@ export default class Rectangle extends Shape {
 		minx = minx || 0;
 		miny = miny || 0;
 		return new Rectangle(minx, miny, maxx - minx, maxy - miny);
+	}
+
+	/**
+	 * Returns the direction the point <i>p</i> is in relation to the given rectangle.
+	 * Possible values are WEST (-1,0), EAST (1,0), NORTH (0,-1) and SOUTH (0,1) if orthogonal is true, otherwise return
+	 * the direction connection the center of r and p.
+	 * @param r
+	 * @param p
+	 * @param orthogonal
+	 * @returns {Point|*}
+	 */
+	static getDirection(r, p, orthogonal = false) {
+		if (!orthogonal)
+			return new Point(r.x, r.y).getDirection(new Point(p.x, p.y));
+
+		let i, distance = Math.abs(r.left - p.x), direction = Point.W;
+
+		i = Math.abs(r.top - p.y);
+		if (i <= distance) {
+			distance = i;
+			direction = Point.N;
+		}
+
+		i = Math.abs(r.bottom - p.y);
+		if (i <= distance) {
+			distance = i;
+			direction = Point.S;
+		}
+
+		i = Math.abs(r.right - p.x);
+		if (i < distance) {
+			direction = Point.E;
+		}
+
+		return direction;
 	}
 }

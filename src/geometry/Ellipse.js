@@ -1,5 +1,6 @@
 import Shape from "./Shape";
 import Point from "./Point";
+import Rectangle from "./Rectangle";
 
 export default class Ellipse extends Shape {
 	toString() {
@@ -79,6 +80,8 @@ export default class Ellipse extends Shape {
 			yout = yout2;
 		}
 
-		return new Point(xout, yout);
+		let p = new Point(xout, yout);
+		let dir = Rectangle.getDirection(rect, p, orthogonal);
+		return {point: p, direction: dir};
 	}
 }

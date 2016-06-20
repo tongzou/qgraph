@@ -7,7 +7,7 @@ import Rectangle from "../geometry/Rectangle";
 import EventDispatcher from "../event/EventDispatcher";
 import Label from "./Label";
 
-class GraphView {
+class Renderer {
 	constructor(id, container, config = {}) {
 		this.id = id;
 		this.box = DomUtils.createElement('div', {id:this.id, tabindex:0}, {overflow: "hidden", width: "100%", height: "100%", position: 'relative'});
@@ -190,7 +190,7 @@ class GraphView {
 	reset() {}
 	destroy() {}
 }
-GraphView.DEFAULTS = {
+Renderer.DEFAULTS = {
 	defaultClickMode: "pan",
 	hideOutline: false,
 	singleSelect: true,
@@ -204,4 +204,4 @@ GraphView.DEFAULTS = {
 	maskOpacity: 0.5
 };
 
-export default GraphView;
+export default Renderer;

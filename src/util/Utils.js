@@ -169,8 +169,10 @@ export default {
 	 * @returns {*[]}
 	 */
 	getRelativePosition: function(bounds, geometry) {
-		return [bounds.width * geometry.x + geometry.width * geometry.anchorX + geometry.offsetX,
-			bounds.height * geometry.y + geometry.height * geometry.anchorY + geometry.offsetY];
+		let x = Math.abs(geometry.x) <= 1 ? bounds.width * geometry.x : geometry.x;
+		let y = Math.abs(geometry.y) <= 1 ? bounds.height * geometry.y : geometry.y;
+		return [x + geometry.width * geometry.anchorX + geometry.offsetX,
+			y + geometry.height * geometry.anchorY + geometry.offsetY];
 	},
 
 	/**

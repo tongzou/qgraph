@@ -1,9 +1,9 @@
 import _ from "lodash";
 import DomUtils from "../util/DomUtils";
-import GraphView from "./GraphView";
+import Renderer from "./Renderer";
 import StringBuffer from "../util/StringBuffer";
 
-class SVGView extends GraphView {
+class SVGRenderer extends Renderer {
 	render() {
 		let result = super.render();
 		if (result) {
@@ -21,7 +21,7 @@ class SVGView extends GraphView {
 		buf.append(this.getTemplate('Grid', this.prop("gridSize")));
 		let markers = this.graph().markers;
 		if (markers.length > 0)
-			buf.append(SVGView.renderMarkers(markers));
+			buf.append(SVGRenderer.renderMarkers(markers));
 		buf.append('</defs>');
 		return buf.toString();
 	}
@@ -52,19 +52,27 @@ class SVGView extends GraphView {
 
 	static renderLink(shape) {
 		let points = shape.points;
+		let controlPts = shape.controlPts;
 		if (!points || points.length == 0) return '';
 
 		let buf = new StringBuffer('M'), point;
 		for (let i = 0; i < points.length; i++) {
 			point = points[i];
 			if (i == 0)
-				buf.append(point.x).append(',').append(point.y);
-			else
-				buf.append(' L').append(point.x).append(',').append(point.y);
+				buf.append(point);
+			else {
+				if (controlPts && controlPts[i]) {
+					buf.append(' C ');
+					for (let j = 0; j < controlPts[i].length; j++)
+						buf.append(controlPts[i][j]).append(' ');
+					buf.append(point);
+				} else
+					buf.append(' L ').append(point);
+			}
 		}
 		let d = buf.toString();
 		buf.clear();
-		if (shape.config && shape.config.showGauge)
+		if (shape.showGauge)
 			buf.append('<path style="stroke: white; stroke-width: 9; visibility: hidden; pointer-events: stroke;" d="')
 				.append(d).append('"/>');
 		buf.append('<path d="').append(d).append('"');
@@ -96,13 +104,13 @@ class SVGView extends GraphView {
 			let child;
 			while (child = el.lastChild)
 				el.removeChild(child);
-			SVGView.appendContent(el, content);
+			SVGRenderer.appendContent(el, content);
 		} else
 			el.innerHTML = content;
 		return el;
 	}
 }
-SVGView.TEMPLATES = {
+SVGRenderer.TEMPLATES = {
 	$root: '<g id="${id}" class="${className}" ns="graph" transform="translate(${x},${y})scale(${scale})">#{children}</g>',
 	$node: '<g id="${id}" class="${className}" ns="${namespace}" transform="translate(${x},${y})">#{shape}#{label}</g>',
 	$edge: '<g id="${id}" class="${className}" ns="${namespace}">#{shape}</g>',
@@ -165,4 +173,4 @@ markerUnits="userSpaceOnUse" ${marker.fill ? `style="fill:${marker.fill}"` : ''}
 `.trim(), {variable: "data"})
 };
 
-export default SVGView;
+export default SVGRenderer;

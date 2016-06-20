@@ -127,7 +127,7 @@ class Point {
 	}
 
 	toString() {
-		return "Point:{x=" + this.x + ";y=" + this.y + "}";
+		return this.x + "," + this.y;
 	}
 }
 

@@ -1,6 +1,7 @@
 import _ from "lodash";
 import Element from "./Element";
-import Link from "../view/Link";
+import Rectangle from "../geometry/Rectangle";
+import Link from "../geometry/Link";
 import Label from "../view/Label";
 import Cache from "../util/Cache";
 
@@ -73,27 +74,32 @@ class Edge extends Element {
 		return pts;
 	}
 
-	getTerminalPoints(key) {
+	getTerminalVisual(key, orthogonal) {
 		let refPts = this.getReferencePoints(key);
-		let pts = [];
+		let terminals = [];
+
+		let getBound = function(pt) {
+			return new Rectangle(pt.x, pt.y, 3, 3);
+		};
+
 		if (this.source) {
-			pts.push(this.source.getPort(key, this.prop('sourcePort'), refPts[1]));
+			terminals.push(this.source.getPort(key, this.prop('sourcePort'), refPts[1], orthogonal));
 		} else
-			pts.push(refPts[0]);
+			terminals.push({point: refPts[0], direction: Rectangle.getDirection(getBound(refPts[0]), refPts[1], true)});
 
 		if (this.target) {
-			pts.push(this.target.getPort(key, this.prop('targetPort'), refPts[0]));
+			terminals.push(this.target.getPort(key, this.prop('targetPort'), refPts[0], orthogonal));
 		} else
-			pts.push(refPts[1]);
-		return pts;
+			terminals.push({point: refPts[1], direction: Rectangle.getDirection(getBound(refPts[1]), refPts[0], true)});
+		return terminals;
 	}
 
 	getShape(key) {
 		let shape = Cache.get(this.id + ".shape", key);
 		if (shape) return shape;
 
-		let shapeConfig = this.viewProp(key, 'shape');
-		shape = Link.getLinkShape(this.getTerminalPoints(key), null, shapeConfig, this.prop('startMarker'), this.prop('endMarker'));
+		let config = this.viewProp(key, 'shape');
+		shape = Link.getLink(this.getTerminalVisual(key, config.orthogonal), config, this.prop('startMarker'), this.prop('endMarker'));
 		Cache.set(this.id + '.shape', shape, key);
 		return shape;
 	}

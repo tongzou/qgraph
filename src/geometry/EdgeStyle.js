@@ -1,5 +1,4 @@
 import Point from "../geometry/Point";
-import Port from "./Port";
 
 const EdgeStyle = (function() {
 	let registry = {};

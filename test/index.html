@@ -26,6 +26,9 @@
 var qg = window["qgraph"].default;
 var graphConfig = {
 	mode: 0,
+	edgeTypes: [
+		{name: 'Default', shape: { linkStyle: 'manhattan', orthogonal: true}}
+	],
     nodeTypes: [
 		{name: "Error"},
 		{
@@ -94,7 +97,7 @@ var graph;
 
 function startViewer() {
 	graph = new qg.Graph('myGraph', graphConfig, model);
-	new qg.SVGView('default', document.getElementById('graph-demo'), viewConfig).graph(graph).render();
+	new qg.SVGRenderer('default', document.getElementById('graph-demo'), viewConfig).graph(graph).render();
 }
 
 function destroyViewer(){
@@ -161,7 +164,7 @@ function testPerformance() {
 	var myClass = function(name) { this.name = name; };
 	myClass.prototype.sayName = function() { console.log(this.name); };
 	var classes = [];
-	var start = new Date().getTime()
+	var start = new Date().getTime();
 	for (var i = 0; i < 100000 	; i++)
 		classes.push(new myClass("name" + i));
 	var end = new Date().getTime();

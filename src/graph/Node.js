@@ -17,7 +17,7 @@ class Node extends Element {
 		// TODO: should we move this to graph class ?
 		var node = n.parent;
 		while (node) {
-			if (this == node) { return true };
+			if (this == node) { return true; }
 			node = node.parent;
 		}
 		return false;
@@ -60,11 +60,10 @@ class Node extends Element {
 		return '';
 	}
 
-	getPort(key, portName = 'auto', endPt) {
-		let shape = this.getShape(key), pt;
+	getPort(key, portName = 'auto', endPt, orthogonal) {
+		let shape = this.getShape(key);
 		if (portName == 'auto') {
-			pt = shape.getPerimeter(endPt);
-			return pt;
+			return shape.getPerimeter(endPt, orthogonal);
 		}
 		return null;
 	}

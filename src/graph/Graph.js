@@ -21,9 +21,6 @@ const edgeDefaults = {
 	role: 'edge',
 	selectable: true,
 	visible: true,
-	shape: {
-		name: "Link"
-	},
 	startMarker: null,
 	endMarker: {
 		id: 'Default_EndMarker',
