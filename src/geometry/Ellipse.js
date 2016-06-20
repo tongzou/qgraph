@@ -28,30 +28,6 @@ export default class Ellipse extends Shape {
 			return new Point(px, py);
 		}
 
-		if (orthogonal) {
-			if (py >= rect.top && py <= rect.bottom) {
-				ty = py - cy;
-				tx = Math.sqrt(a * a * (1 - (ty * ty) / (b * b))) || 0;
-
-				if (px <= rect.left) {
-					tx = -tx;
-				}
-
-				return new Point(cx + tx, py);
-			}
-
-			if (px >= rect.left && px <= rect.right) {
-				tx = px - cx;
-				ty = Math.sqrt(b * b * (1 - (tx * tx) / (a * a))) || 0;
-
-				if (py <= rect.top) {
-					ty = -ty;
-				}
-
-				return new Point(px, cy + ty);
-			}
-		}
-
 		// Calculates intersection
 		var d = dy / dx;
 		var h = cy - d * cx;
@@ -82,6 +58,20 @@ export default class Ellipse extends Shape {
 
 		let p = new Point(xout, yout);
 		let dir = Rectangle.getDirection(rect, p, orthogonal);
+		if (orthogonal) {
+			if (dir.x == -1) {
+				return {point: new Point(cx - a, cy), direction: dir};
+			}
+			if (dir.x == 1) {
+				return {point: new Point(cx + a, cy), direction: dir};
+			}
+			if (dir.y == -1) {
+				return {point: new Point(cx, cy - b), direction: dir};
+			}
+			if (dir.y == 1) {
+				return {point: new Point(cx, cy + b), direction: dir};
+			}
+		}
 		return {point: p, direction: dir};
 	}
 }

@@ -116,24 +116,22 @@ export default class Rectangle extends Shape {
 		}
 
 		if (orthogonal) {
-			if (pt.x >= rect.left &&
-				pt.x <= rect.right) {
-				p.x = pt.x;
-			} else if (pt.y >= rect.top &&
-				pt.y <= rect.bottom) {
-				p.y = pt.y;
-			}
-
-			if (pt.x < rect.left) {
+			if (alpha < -pi + t || alpha > pi - t) {
+				// Left edge
 				p.x = rect.left;
-			} else if (pt.x > rect.right) {
-				p.x = rect.right;
-			}
-
-			if (pt.y < rect.top) {
+				p.y = y;
+			} else if (alpha < -t) {
+				// Top Edge
 				p.y = rect.top;
-			} else if (pt.y > rect.bottom) {
+				p.x = x;
+			} else if (alpha < t) {
+				// Right Edge
+				p.x = rect.right;
+				p.y = y;
+			} else {
+				// Bottom Edge
 				p.y = rect.bottom;
+				p.x = x;
 			}
 		}
 
