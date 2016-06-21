@@ -129,8 +129,8 @@ class Manhattan extends Link {
 	}
 
 	get points() {
-		let pos = this.routeInternal(this.start, this.end, this.startNormal, this.endNormal);
-		pos = this.processPositions(this.start, this.end, pos, this.startNormal.x!=0);
+		let pos = Manhattan.routeInternal(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
+		pos = Manhattan.processPositions(this.start, this.end, pos, this.startNormal.x!=0);
 		if (this.autoRoute) {
 			this._mergeSegments(pos);
 			var boxes = [], node, startBox, endBox;
@@ -160,7 +160,7 @@ class Manhattan extends Link {
 	 * None of the parameters can be null
 	 * TODO: This method could use some improvement...
 	 */
-	routeInternal(start, end, startNormal, endNormal) {
+	static routeInternal(start, end, startNormal, endNormal, buffer) {
 		var direction = start.getDirection(end);
 		var average = start.getMidPoint(end);
 		var pos = [];
@@ -168,7 +168,7 @@ class Manhattan extends Link {
 		pos[0] = horizontal ? start.y : start.x;
 
 		horizontal = !horizontal;
-		var i, l = this.MIN_BUFFER;
+		var i;
 		if (startNormal.dotProduct(endNormal) == 0) {
 			if ((startNormal.dotProduct(direction) >= 0)
 				&& (endNormal.dotProduct(direction) <= 0)) {
@@ -176,7 +176,7 @@ class Manhattan extends Link {
 			} else {
 				// 2
 				if (startNormal.dotProduct(direction) < 0)
-					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(l)));
+					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(buffer)));
 				else
 					i = horizontal ? average.y : average.x;
 
@@ -184,7 +184,7 @@ class Manhattan extends Link {
 				horizontal = !horizontal;
 
 				if (endNormal.dotProduct(direction) > 0)
-					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(l)));
+					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(buffer)));
 				else
 					i = horizontal ? average.y : average.x;
 
@@ -195,15 +195,15 @@ class Manhattan extends Link {
 			if (startNormal.dotProduct(endNormal) > 0) {
 				//1
 				if (startNormal.dotProduct(direction) >= 0)
-					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(l)));
+					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(buffer)));
 				else
-					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(l)));
+					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(buffer)));
 				pos.push(i);
 				horizontal = !horizontal;
 			} else {
 				//3 or 1
 				if (startNormal.dotProduct(direction) < 0) {
-					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(l)));
+					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(buffer)));
 					pos.push(i);
 					horizontal = !horizontal;
 				}
@@ -213,7 +213,7 @@ class Manhattan extends Link {
 				horizontal = !horizontal;
 
 				if (startNormal.dotProduct(direction) < 0) {
-					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(l)));
+					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(buffer)));
 					pos.push(i);
 					horizontal = !horizontal;
 				}
@@ -225,7 +225,7 @@ class Manhattan extends Link {
 	}
 
 	// Process the positions.
-	processPositions(start, end, positions, horizontal) {
+	static processPositions(start, end, positions, horizontal) {
 		var pos = [];
 		pos[0] = horizontal ? start.x : start.y;
 		var i;

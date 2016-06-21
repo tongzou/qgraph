@@ -16,6 +16,7 @@ let defaultConfig = {
 	align: "left",
 	width: 0,
 	height: 0,
+	rotation: null,
 	geometry: {x: 0, y: 0, anchorY: 0, offsetX: 0, offsetY: 0}
 };
 
@@ -101,13 +102,13 @@ export default (function() {
 
 		var width = 0;
 		//split the text by lines
-		var lines = string.split(/[\r\n|\n|\r]/);
+		var lines = string.split('\n');
 
 		var buf = new StringBuffer();
 
 		for (var j = 0; j < lines.length; j++) {
 			//split each line by word
-			var words = lines[j].split(/[\s]/);
+			var words = lines[j].split(/\s/);
 			var line = "", currentWidth = 0, wordWidth = 0, newLine = true, word;
 
 			for (var i = 0; i < words.length; i++) {
@@ -208,6 +209,8 @@ export default (function() {
 		}
 		let pos = Utils.getRelativePosition({width: containerWidth, height: containerHeight}, geometry);
 		let bounds = new Rectangle(pos[0], pos[1], geometry.width, geometry.height);
+		// the pivot is the center of rotation when the label has a rotation specified.
+		let pivot = align == 'center' ? [0, 0] : (align == 'left' ? [-wrappedLabel.width/2, 0] : [wrappedLabel.width/2, 0]);
 
 		// the maximum bounds for the label, used to position inline editor
 		geometry.width = Math.max(w + 2 * padding, geometry.width);
@@ -218,11 +221,11 @@ export default (function() {
 		return {
 			config: labelConfig, label: wrappedLabel, _label: label,
 			dx, dy: -geometry.height/2 + padding + wrappedLabel.lineHeight, anchor, lineHeight: wrappedLabel.lineHeight + linePadding,
-			bounds, maxBounds
+			pivot, bounds, maxBounds
 		};
 	}
 
-	function getLabelBoxForEdge(label, edge, labelConfig) {
+	function getLabelBoxForLink(label, link, labelConfig) {
 		labelConfig = _.defaultsDeep(labelConfig, defaultConfig);
 		if (!label || label == "") return null;
 
@@ -232,7 +235,7 @@ export default (function() {
 		let bold = (fontStyle & FONT_BOLD) == FONT_BOLD;
 
 		let wrappedLabel = this.wrap(label, labelConfig.width, fontSize, fontFamily, bold);
-		let pos = edge.getRelativePosition({x: labelConfig.labelLocation/2, offsetX: labelConfig.labelOffsetX || 0, offsetY: labelConfig.labelOffsetY || 0});
+		let pos = link.getRelativePosition({x: labelConfig.labelLocation/2, offsetX: labelConfig.labelOffsetX || 0, offsetY: labelConfig.labelOffsetY || 0});
 
 		let anchor = "start", dx;
 		switch (labelConfig.align) {
@@ -250,8 +253,8 @@ export default (function() {
 		}
 		return {
 			config: labelConfig, label: wrappedLabel, _label: label,
-			dx: dx, dy: -wrappedLabel.height/2 + wrappedLabel.lineHeight,
-			anchor: anchor, lineHeight: wrappedLabel.lineHeight,
+			dx, dy: -wrappedLabel.height/2 + wrappedLabel.lineHeight,
+			anchor, lineHeight: wrappedLabel.lineHeight,
 			bounds: new Rectangle(pos[0], pos[1], wrappedLabel.width, wrappedLabel.height)
 		};
 	}
@@ -265,7 +268,7 @@ export default (function() {
 
 		start: function(key, container, box, refEl, textEl) {
 			if (!this.input) {
-				this.input = DomUtils.createElement('textarea', {id:"inlineEditor", unselectable:"off"}, {position:"absolute", overflow:"hidden", padding:"0px", margin:"0px", border:"transparent"}),
+				this.input = DomUtils.createElement('textarea', {id:"inlineEditor", unselectable:"off"}, {position:"absolute", overflow:"hidden", padding:"0px", margin:"0px", border:"transparent"});
 				container.appendChild(this.input);
 			} else if (this.visible() && this.key != key) {
 				// need to close the existing editor first
@@ -330,7 +333,7 @@ export default (function() {
 		getStringSize,
 		wrap,
 		getLabelBox,
-		getLabelBoxForEdge,
+		getLabelBoxForLink,
 		render,
 		editor
 	};
