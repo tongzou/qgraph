@@ -108,7 +108,19 @@ class BezierLink extends Link {
 		let s = this.points[0], e = this.points[1];
 		let pts = [];
 		pts[0] = null;
-		pts[1] = [new Point((s.x + e.x)/2, s.y), new Point((s.x + e.x)/2, e.y)];
+		pts[1] = [];
+		if (this.startNormal.x == 0) {
+			pts[1][0] = new Point(s.x, (s.y + e.y)/2);
+		}
+		else {
+			pts[1][0] = new Point((s.x + e.x)/2, s.y);
+		}
+		if (this.endNormal.x == 0) {
+			pts[1][1] = new Point(e.x, (s.y + e.y)/2);
+		}
+		else {
+			pts[1][1] = new Point((s.x + e.x)/2, e.y);
+		}
 		return pts;
 	}
 }
