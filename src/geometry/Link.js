@@ -180,6 +180,8 @@ class Manhattan extends Link {
 		var direction = start.getDirection(end);
 		var average = start.getMidPoint(end);
 		var pos = [];
+		var startPositive = new Point(startNormal.x*startNormal.x, startNormal.y*startNormal.y);
+		var endPositive = new Point(endNormal.x*endNormal.x, endNormal.y*endNormal.y);
 		var horizontal = startNormal.x != 0;
 		pos[0] = horizontal ? start.y : start.x;
 
@@ -192,7 +194,7 @@ class Manhattan extends Link {
 			} else {
 				// 2
 				if (startNormal.dotProduct(direction) < 0)
-					i = startNormal.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
+					i = startPositive.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
 				else
 					i = horizontal ? average.y : average.x;
 
@@ -200,7 +202,7 @@ class Manhattan extends Link {
 				horizontal = !horizontal;
 
 				if (endNormal.dotProduct(direction) > 0)
-					i = endNormal.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
+					i = endPositive.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
 				else
 					i = horizontal ? average.y : average.x;
 
@@ -211,15 +213,15 @@ class Manhattan extends Link {
 			if (startNormal.dotProduct(endNormal) > 0) {
 				//1
 				if (startNormal.dotProduct(direction) >= 0)
-					i = startNormal.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
+					i = startPositive.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
 				else
-					i = endNormal.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
+					i = endPositive.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
 				pos.push(i);
 				horizontal = !horizontal;
 			} else {
 				//3 or 1
 				if (startNormal.dotProduct(direction) < 0) {
-					i = startNormal.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
+					i = startPositive.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
 					pos.push(i);
 					horizontal = !horizontal;
 				}
@@ -229,7 +231,7 @@ class Manhattan extends Link {
 				horizontal = !horizontal;
 
 				if (startNormal.dotProduct(direction) < 0) {
-					i = endNormal.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
+					i = endPositive.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
 					pos.push(i);
 					horizontal = !horizontal;
 				}

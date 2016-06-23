@@ -81,16 +81,6 @@ class Point {
 	}
 
 	/**
-	 * Calculates the similarity of this Ray with another.
-	 * Similarity is defined as the absolute value of the dotProduct()
-	 * @param p2
-	 * @returns {number}
-	 */
-	similarity(p2) {
-		return Math.abs(this.dotProduct(p2));
-	}
-
-	/**
 	 * Get the mid point between this and p2.
  	 */
 	getMidPoint(p2) {
