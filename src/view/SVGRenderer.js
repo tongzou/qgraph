@@ -55,6 +55,27 @@ class SVGRenderer extends Renderer {
 		let controlPts = shape.controlPts;
 		if (!points || points.length == 0) return '';
 
+		if (!controlPts && shape.round) {
+			// render rounded line joins.
+			let newPts = [];
+			controlPts = [];
+			let prev = points[0], next, d, corner;
+			newPts.push(prev);
+			for (let i = 1; i < points.length - 1; i++) {
+				next = points[i];
+				// set the control point first.
+				controlPts[2*i] = [next, next];
+				// check the size of the corner.
+				d = prev.distance(next);
+				corner = Math.min(shape.round, d/2);
+				// split the point into two.
+				newPts.push(next.getDirection(prev).scale(corner).translate(next));
+				newPts.push(next.getDirection(points[i+1]).scale(corner).translate(next));
+				prev = next;
+			}
+			newPts.push(points[points.length - 1]);
+			points = newPts;
+		}
 		let buf = new StringBuffer('M'), point;
 		for (let i = 0; i < points.length; i++) {
 			point = points[i];

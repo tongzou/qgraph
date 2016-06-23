@@ -2,12 +2,12 @@ import _ from "lodash";
 import Point from "./Point";
 
 let defaultConfig = {
-	linkStyle: "direct",
+	type: "direct",
 	showGauge: false,
 	orthogonal: false
 };
 
-let linkStyles = {};
+let linkTypes = {};
 
 class Link {
 	constructor(terminalVisual, shapeConfig = {}, startMarker = null, endMarker = null) {
@@ -85,10 +85,10 @@ class Link {
 
 	static getLink(terminalVisual, shapeConfig = {}, startMarker = null, endMarker = null) {
 		shapeConfig = _.defaultsDeep(shapeConfig, defaultConfig);
-		let linkClass = linkStyles[shapeConfig.linkStyle];
+		let linkClass = linkTypes[shapeConfig.type];
 		if (linkClass)
 			return new linkClass(terminalVisual, shapeConfig, startMarker, endMarker);
-		console.log('link style not supported: ' + shapeConfig.linkStyle);
+		console.log('link type not supported: ' + shapeConfig.type);
 		return null;
 	}
 }
@@ -165,6 +165,10 @@ class Manhattan extends Link {
 		}
 		this._mergeSegments(pos);
 		return pos;
+	}
+
+	get controlPts() {
+		
 	}
 
 	/**
@@ -646,9 +650,9 @@ class Manhattan extends Link {
 	}
 }
 
-linkStyles['direct'] = DirectLink;
-linkStyles['bezier'] = BezierLink;
-linkStyles['entityRelations'] = EntityRelations;
-linkStyles['manhattan'] = Manhattan;
+linkTypes['direct'] = DirectLink;
+linkTypes['bezier'] = BezierLink;
+linkTypes['entityRelations'] = EntityRelations;
+linkTypes['manhattan'] = Manhattan;
 
 export default Link;
