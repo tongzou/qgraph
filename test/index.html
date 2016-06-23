@@ -27,7 +27,7 @@ var qg = window["qgraph"].default;
 var graphConfig = {
 	mode: 0,
 	edgeTypes: [
-		{name: 'Default', shape: { type: 'manhattan', round: 20, orthogonal: true}}
+		{name: 'Default', shape: { type: 'manhattan', round: 0, orthogonal: true}}
 	],
     nodeTypes: [
 		{name: "Error"},
@@ -80,14 +80,13 @@ var viewConfig = {
 
 var model = {
     nodes: [
-	    {type:'Assignment', label:'simpleFlow1', id:'ASSIGNMENT63', x:100, y:150},
-	    {type:'Assignment', label:'[Utility]', id:'Utility2', x:100, y:300},
-	    {type:'Start', label:'', id:'Start1', x:300, y:500},
-	    {type:'End', label:'', id:'END52', x:500, y:60}
+	    {type:'Assignment', label:'simpleFlow1', id:'1', x:-100, y:-100},
+	    {type:'Assignment', label:'[Utility]', id:'2', x:-100, y:100},
+	    {type:'Start', label:'', id:'3', x:300, y:500},
+	    {type:'End', label:'', id:'4', x:500, y:60}
     ],
 	edges: [
-		{from: 'Start1', to:'ASSIGNMENT63'},
-		{from: 'ASSIGNMENT63', to:'END52'}
+		{from: '1', to:'2'}
 	]
 };
 

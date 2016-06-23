@@ -168,7 +168,7 @@ class Manhattan extends Link {
 	}
 
 	get controlPts() {
-		
+
 	}
 
 	/**
@@ -192,7 +192,7 @@ class Manhattan extends Link {
 			} else {
 				// 2
 				if (startNormal.dotProduct(direction) < 0)
-					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(buffer)));
+					i = startNormal.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
 				else
 					i = horizontal ? average.y : average.x;
 
@@ -200,7 +200,7 @@ class Manhattan extends Link {
 				horizontal = !horizontal;
 
 				if (endNormal.dotProduct(direction) > 0)
-					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(buffer)));
+					i = endNormal.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
 				else
 					i = horizontal ? average.y : average.x;
 
@@ -211,15 +211,15 @@ class Manhattan extends Link {
 			if (startNormal.dotProduct(endNormal) > 0) {
 				//1
 				if (startNormal.dotProduct(direction) >= 0)
-					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(buffer)));
+					i = startNormal.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
 				else
-					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(buffer)));
+					i = endNormal.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
 				pos.push(i);
 				horizontal = !horizontal;
 			} else {
 				//3 or 1
 				if (startNormal.dotProduct(direction) < 0) {
-					i = startNormal.similarity(start.getTranslated(startNormal.getScaled(buffer)));
+					i = startNormal.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
 					pos.push(i);
 					horizontal = !horizontal;
 				}
@@ -229,7 +229,7 @@ class Manhattan extends Link {
 				horizontal = !horizontal;
 
 				if (startNormal.dotProduct(direction) < 0) {
-					i = endNormal.similarity(end.getTranslated(endNormal.getScaled(buffer)));
+					i = endNormal.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
 					pos.push(i);
 					horizontal = !horizontal;
 				}
