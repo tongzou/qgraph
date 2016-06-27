@@ -1,8 +1,8 @@
 import _ from "lodash";
 import StringBuffer from "../util/StringBuffer";
-import Element from "./Element";
+import Cell from "./Cell";
 
-class Node extends Element {
+class Node extends Cell {
 	constructor(graph, config = {}) {
 		if (!config.id) config.id = _.uniqueId('N');
 		super(graph, config);

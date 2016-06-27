@@ -11,7 +11,7 @@ import Ellipse from "./geometry/Ellipse";
 import Link from "./geometry/Link";
 import EventDispatcher from "./event/EventDispatcher";
 import Graph from "./graph/Graph";
-import Element from "./graph/Element";
+import Cell from "./graph/Cell";
 import Node from "./graph/Node";
 import Edge from "./graph/Edge";
 import Layout from "./layout/Layout";
@@ -40,7 +40,7 @@ export default {
 	Label,
 	Marker,
 	Graph,
-	Element,
+	Cell,
 	Node,
 	Edge,
 	Layout,

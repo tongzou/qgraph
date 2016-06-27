@@ -7,9 +7,9 @@ import Rectangle from "../geometry/Rectangle";
 import Label from "../view/Label";
 
 /**
- * The Element is the common parent for Node and Edge.
+ * The Cell is the common parent for Node and Edge.
  */
-export default class Element {
+export default class Cell {
 	constructor(graph, config = {id: _.uniqueId()}) {
 		this.graph = graph;
 		this.id = config.id;
@@ -130,7 +130,7 @@ export default class Element {
 		if (box) return box;
 		let shape = this.getShape(key);
 		// Just get the config will have a positive performance boost for IE11 and IE10.
-		box = Label.getLabelBox(this.prop('label'), shape.width, shape.height, this.viewProp(key, 'labelConfig'));
+		box = Label.getLabelBox(this.prop('label'), this.viewProp(key, 'labelConfig'), shape.width, shape.height);
 		Cache.set(this.id + '.labelBox', box, key);
 		return box;
 	}

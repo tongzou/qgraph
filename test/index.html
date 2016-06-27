@@ -27,7 +27,7 @@ var qg = window["qgraph"].default;
 var graphConfig = {
 	mode: 0,
 	edgeTypes: [
-		{name: 'Default', shape: { type: 'manhattan', round: 0, orthogonal: true}}
+		{name: 'Default', shape: { type: 'manhattan', round: 0, orthogonal: true}, labelConfig: { align: 'center', geometry: {x: 0.5}}}
 	],
     nodeTypes: [
 		{name: "Error"},
@@ -86,7 +86,7 @@ var model = {
 	    {type:'End', label:'', id:'4', x:500, y:60}
     ],
 	edges: [
-		{from: '1', to:'2'}
+		{from: '1', to:'2', label:'edge'}
 	]
 };
 

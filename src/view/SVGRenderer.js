@@ -135,7 +135,7 @@ class SVGRenderer extends Renderer {
 SVGRenderer.TEMPLATES = {
 	$root: '<g id="${id}" class="${className}" ns="graph" transform="translate(${x},${y})scale(${scale})">#{children}</g>',
 	$node: '<g id="${id}" class="${className}" ns="${namespace}" transform="translate(${x},${y})">#{shape}#{label}</g>',
-	$edge: '<g id="${id}" class="${className}" ns="${namespace}">#{shape}</g>',
+	$edge: '<g id="${id}" class="${className}" ns="${namespace}">#{shape}#{label}</g>',
 	Ellipse: '<ellipse cx="0" cy="0" rx="${width/2}" ry="${height/2}"/>',
 	Rectangle: '<rect x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" rx="9" ry="9"/>',
 	Triangle: '<polygon points="${-width/2},${-height/2} ${width/2},${-height/2} 0,${height/2}"/>',

@@ -1,11 +1,11 @@
 import _ from "lodash";
-import Element from "./Element";
+import Cell from "./Cell";
 import Rectangle from "../geometry/Rectangle";
 import Link from "../geometry/Link";
 import Label from "../view/Label";
 import Cache from "../util/Cache";
 
-class Edge extends Element {
+class Edge extends Cell {
 	constructor(graph, config = {}, source, target) {
 		if (!config.id) config.id = _.uniqueId('E');
 		super(graph, config);
@@ -53,7 +53,10 @@ class Edge extends Element {
 	}
 
 	getLabelBox(key) {
-		return Label.getLabelBoxForEdge(this.prop('label'), this.getView(key), this.viewProp(key, 'labelConfig'));
+		var label = this.prop('label');
+		if (label)
+			return Label.getLabelBoxForLink(label, this.viewProp(key, 'labelConfig'), this.getShape(key));
+		return null;
 	}
 
 	/**

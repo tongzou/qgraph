@@ -171,8 +171,11 @@ export default {
 	getRelativePosition: function(bounds, geometry) {
 		let x = Math.abs(geometry.x) <= 1 ? bounds.width * geometry.x : geometry.x;
 		let y = Math.abs(geometry.y) <= 1 ? bounds.height * geometry.y : geometry.y;
-		return [x + geometry.width * geometry.anchorX + geometry.offsetX,
-			y + geometry.height * geometry.anchorY + geometry.offsetY];
+		return this.offsetPosition([x, y], geometry);
+	},
+
+	offsetPosition: function(pos, geometry) {
+		return [pos[0] + geometry.width * geometry.anchorX + geometry.offsetX, pos[1] + geometry.height * geometry.anchorY + geometry.offsetY];
 	},
 
 	/**

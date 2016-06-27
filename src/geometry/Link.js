@@ -1,10 +1,20 @@
 import _ from "lodash";
 import Point from "./Point";
+import Utils from "../util/Utils";
 
 let defaultConfig = {
 	type: "direct",
 	showGauge: false,
 	orthogonal: false
+};
+
+let defaultGeometry = {
+	width: 0,
+	height: 0,
+	anchorX: 0,
+	anchorY: 0,
+	offsetX: 0,
+	offsetY: 0
 };
 
 let linkTypes = {};
@@ -26,19 +36,12 @@ class Link {
 
 	get points() { return null; }
 	get controlPts() { return null; }
-
-	/**
-	 *
-	 * Return the total length of this connection, in pixels.
-	 */
-	getLength() {
-		if (!_.isUndefined(this.length)) return this.length;
-
-		var points = this.points;
-		var i, l = 0;
+	get length() {
+		let points = this.points;
+		let i, l = 0;
 		for (i = 0; i < points.length - 1; i++)
 			l += points[i].distance(points[i+1]);
-		return this.length = l;
+		return l;
 	}
 
 	/**
@@ -48,20 +51,16 @@ class Link {
 	 * @return *[] the relative position.
 	 */
 	getRelativePosition(geometry) {
-		var p = geometry.x, l = this.getLength();
-		if (_.isString(p)) {
-			if (/%$/.test(p)) {
-				p = s(p).strLeft('%').toNumber() / 100;
-			} else if (/px$/.test(p)) {
-				p = s(p).strLeft('px').toNumber();
-			}
-		}
-		if (p >= -1 && p <= 1) p *= l;
+		if (_.isNumber(geometry))
+			geometry = {x: geometry};
+		geometry = _.defaults(geometry, defaultGeometry);
+		let p = geometry.x, l = this.length;
+		if (Math.abs(p) <= 1) p *= l;
 		if (p < 0) p = l + p;
 		if (p > l) p = l;
 
-		var points = this.getPoints(), d, point, dir;
-		for (var i = 0; i < points.length - 1; i++) {
+		let points = this.points, d, point, dir;
+		for (let i = 0; i < points.length - 1; i++) {
 			d = points[i].distance(points[i+1]);
 			if (p <= d) {
 				// we've located the line segment.
@@ -76,7 +75,7 @@ class Link {
 		// return the last point.
 		if (!point)
 			point = points[points.length - 1];
-		return [point.x + geometry.offsetX, point.y + geometry.offsetY];
+		return Utils.offsetPosition([point.x, point.y], geometry);
 	}
 
 	toString() {
@@ -125,26 +124,23 @@ class BezierLink extends Link {
 	}
 
 	getRelativePosition(geometry) {
-		var p = geometry.x, l = this.getLength();
-		if (_.isString(p)) {
-			if (/%$/.test(p)) {
-				p = s(p).strLeft('%').toNumber() / 100;
-			} else if (/px$/.test(p)) {
-				p = s(p).strLeft('px').toNumber();
-			}
-		}
+		if (_.isNumber(geometry))
+			geometry = {x: geometry};
+		geometry = _.defaults(geometry, defaultGeometry);
+		let p = geometry.x, l = this.length;
 		if (Math.abs(p) > 1) p /= l;
 		if (p < 0) p++;
 		if (p > 1) p--;
 
-		var pts = this.points;
-		var ctrlpts = this.controlPts;
-		var p1 = pts[0];
-		var p2 = ctrlpts[1][0];
-		var p3 = ctrlpts[1][1];
-		var p4 = pts[1];
+		let pts = this.points;
+		let ctrlpts = this.controlPts;
+		let p1 = pts[0];
+		let p2 = ctrlpts[1][0];
+		let p3 = ctrlpts[1][1];
+		let p4 = pts[1];
 
-		return [(1-p)*(1-p)*(1-p) * p1.x + 3*p*(1-p)*(1-p) * p2.x + 3*p*p*(1-p) * p3.x + p*p*p * p4.x + geometry.offsetX, (1-p)*(1-p)*(1-p) * p1.y + 3*p*(1-p)*(1-p) * p2.y + 3*p*p*(1-p) * p3.y + p*p*p * p4.y + geometry.offsetY];
+		let point = [(1-p)*(1-p)*(1-p) * p1.x + 3*p*(1-p)*(1-p) * p2.x + 3*p*p*(1-p) * p3.x + p*p*p * p4.x, (1-p)*(1-p)*(1-p) * p1.y + 3*p*(1-p)*(1-p) * p2.y + 3*p*p*(1-p) * p3.y + p*p*p * p4.y];
+		return Utils.offsetPosition([point.x, point.y], geometry);
 	}
 }
 
@@ -188,10 +184,6 @@ class Manhattan extends Link {
 		}
 		this._mergeSegments(pos);
 		return pos;
-	}
-
-	get controlPts() {
-
 	}
 
 	/**
