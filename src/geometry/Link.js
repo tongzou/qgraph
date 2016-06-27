@@ -123,6 +123,29 @@ class BezierLink extends Link {
 		}
 		return pts;
 	}
+
+	getRelativePosition(geometry) {
+		var p = geometry.x, l = this.getLength();
+		if (_.isString(p)) {
+			if (/%$/.test(p)) {
+				p = s(p).strLeft('%').toNumber() / 100;
+			} else if (/px$/.test(p)) {
+				p = s(p).strLeft('px').toNumber();
+			}
+		}
+		if (Math.abs(p) > 1) p /= l;
+		if (p < 0) p++;
+		if (p > 1) p--;
+
+		var pts = this.points;
+		var ctrlpts = this.controlPts;
+		var p1 = pts[0];
+		var p2 = ctrlpts[1][0];
+		var p3 = ctrlpts[1][1];
+		var p4 = pts[1];
+
+		return [(1-p)*(1-p)*(1-p) * p1.x + 3*p*(1-p)*(1-p) * p2.x + 3*p*p*(1-p) * p3.x + p*p*p * p4.x + geometry.offsetX, (1-p)*(1-p)*(1-p) * p1.y + 3*p*(1-p)*(1-p) * p2.y + 3*p*p*(1-p) * p3.y + p*p*p * p4.y + geometry.offsetY];
+	}
 }
 
 class EntityRelations extends Link {
