@@ -162,8 +162,8 @@ export default class EventDispatcher {
 		this.dispatch(event, type, ns, data, pos);
 
 		// disable the default context menu
-		if (type == 'contextmenu')
-			event.preventDefault();
+		//if (type == 'contextmenu')
+		//	event.preventDefault();
 	}
 
 	/**
@@ -230,8 +230,8 @@ export default class EventDispatcher {
 		});
 
 		// after dispatching, do not propagate.
-		if (event.stopPropagation)
-			event.stopPropagation();
+		//if (event.stopPropagation)
+		//	event.stopPropagation();
 	}
 
 	getPosition(event) {
