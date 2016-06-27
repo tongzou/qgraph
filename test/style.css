@@ -12,7 +12,7 @@
 .assignment text {
     font-size: 11px;
     font-family: Arial;
-    stroke-width: 1;
+    stroke-width: 0;
 }
 
 .end {
@@ -26,4 +26,10 @@
     stroke: rgb(134, 142, 142);
     stroke-width: 1;
     stroke-miterlimit: 10;
+}
+.edge text {
+    font-size: 11px;
+    font-family: Arial;
+    stroke-width: 0;
+    fill: red;
 }

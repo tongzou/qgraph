@@ -27,7 +27,7 @@ var qg = window["qgraph"].default;
 var graphConfig = {
 	mode: 0,
 	edgeTypes: [
-		{name: 'Default', shape: { type: 'manhattan', round: 0, orthogonal: true}, labelConfig: { align: 'center', geometry: {x: 0.5}}}
+		{name: 'Default', shape: { type: 'manhattan', round: 0, orthogonal: true}, labelConfig: { align: 'center', backgroundColor: 'yellow', geometry: {x: 0.5}}}
 	],
     nodeTypes: [
 		{name: "Error"},
@@ -51,6 +51,7 @@ var graphConfig = {
 			labelConfig: {
 				ns: 'label',
 				align: "center",
+				backgroundColor: 'yellow',
 				width: 0.9,
 				textStyle: "fill:#888888"
 			}
