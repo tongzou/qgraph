@@ -145,7 +145,56 @@ class BezierLink extends Link {
 }
 
 class EntityRelations extends Link {
+	get points() {
+		var source = Port.getBounds(edge, true);
+		var target = Port.getBounds(edge, false);
+		var isSourceLeft = target.right() < source.x;
+		var isTargetLeft = source.right() < target.x;
+		var result = [];
 
+		var x0 = (isSourceLeft) ? source.x : source.x + source.width;
+		var y0 = source.getCenterY();
+		result.push(new Point(x0, y0));
+
+		var xe = (isTargetLeft) ? target.x : target.x + target.width;
+		var ye = target.getCenterY();
+
+		var seg = this.segment;
+
+		var dx = (isSourceLeft) ? -seg : seg;
+		var dep = new Point(x0 + dx, y0);
+
+		dx = (isTargetLeft) ? -seg : seg;
+		var arr = new Point(xe + dx, ye);
+
+		// Adds intermediate points if both go out on same side
+		if (isSourceLeft == isTargetLeft)
+		{
+			var x = (isSourceLeft) ?
+			Math.min(x0, xe)-seg :
+			Math.max(x0, xe)+seg;
+
+			result.push(new Point(x, y0));
+			result.push(new Point(x, ye));
+		}
+		else if ((dep.x < arr.x) == isSourceLeft)
+		{
+			var midY = y0 + (ye - y0) / 2;
+
+			result.push(dep);
+			result.push(new Point(dep.x, midY));
+			result.push(new Point(arr.x, midY));
+			result.push(arr);
+		}
+		else
+		{
+			result.push(dep);
+			result.push(arr);
+		}
+
+		result.push(new Point(xe, ye));
+		return result;
+	}
 }
 
 

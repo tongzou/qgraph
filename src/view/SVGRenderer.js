@@ -181,8 +181,8 @@ markerUnits="userSpaceOnUse" ${marker.fill ? `style="fill:${marker.fill}"` : ''}
 		<% if (box.config && box.config.ns) {%>ns="<%=box.config.ns%>"<%}%>\
 		text-anchor="<%=box.anchor%>"\
 		transform="translate(<%=box.bounds.x%>,<%=box.bounds.y%>)<% if (box.config && box.config.rotation) {%>rotate(<%=box.config.rotation%> <%=box.pivot[0]%> <%=box.pivot[1]%>)<%}%>">
-	<% if (box.config.backgroundColor) {%>
-		<rect x="<%=-box.bounds.width/2%>" y="<%=-box.bounds.height/2%>" width="<%=box.bounds.width%>" height="<%=box.bounds.height%>" fill="<%=box.config.backgroundColor%>"/>
+	<% if (box.config.backgroundStyle) {%>
+		<rect x="<%=-box.bounds.width/2%>" y="<%=-box.bounds.height/2%>" width="<%=box.bounds.width%>" height="<%=box.bounds.height%>" style="<%=box.config.backgroundStyle%>"/>
 	<% } if (_.isArray(box.label)) { 
 		_.each(box.label, function(value, line) {%>
 			<text <% if (box.config && box.config.textStyle) {%>style="<%=box.config.textStyle%>"<%}%>\

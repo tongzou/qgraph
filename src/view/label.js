@@ -24,55 +24,39 @@ let defaultConfig = {
  * The label object handles label sizing/positioning
  */
 export default (function() {
-	let canvasSupported = false, stringMeasureEl = null;
+	let stringMeasureEl = null, measureDiv, baselineDiv;
 
 	/**
 	 * Calculate the size of the string.
 	 */
 	let getStringSize = _.memoize(function(str, fontSize, fontFamily, bold) {
-		if (!str || str == "")
-			return [0, 0];
-
 		fontSize = fontSize || 11;
 		fontFamily = fontFamily || 'Arial,Helvetica';
 		bold = !_.isUndefined(bold) ? bold: false;
 
-		var size;
-
-		if (_.isNull(canvasSupported)) {
-			stringMeasureEl = DomUtils.createElement('canvas');
-			canvasSupported = !!(stringMeasureEl.getContext && stringMeasureEl.getContext('2d'));
+		// first check if there is a string-measuring div available, if not, create now.
+		if (!stringMeasureEl) {
+			stringMeasureEl = DomUtils.createElement('iframe', {id:"_ComputeStylesIframe"}, {position:"absolute", visibility:"hidden", width:"auto"});
+			document.body.appendChild(stringMeasureEl);
+			var doc = stringMeasureEl.contentWindow.document;
+			doc.open();
+			doc.write('<html><body>\
+				<div id="baselineDiv" style="height:100px;"><span style="line-height:0">T</span><span style="height:100%;display:inline-block;"></span></div>\
+				<div id="measureDiv" style="position:absolute;width:auto;height:auto;padding:0;white-space:pre-wrap;word-wrap:break-word;display:inline-block;"></div>\
+				</body></html>');
+			doc.close();
+			measureDiv = doc.getElementById("measureDiv");
+			baselineDiv = doc.getElementById("baselineDiv");
 		}
+		baselineDiv.style.fontSize = measureDiv.style.fontSize = fontSize;
+		baselineDiv.style.fontFamily = measureDiv.style.fontFamily = fontFamily;
+		baselineDiv.style.fontWeight = measureDiv.style.fontWeight = bold ? 'bold' : 'normal';
+		measureDiv.innerHTML = str;
 
-		if (canvasSupported) {
-			Utils.log('Label', 'using canvas');
-			var ctx = stringMeasureEl.getContext("2d");
-			ctx.font = fontSize + " " + fontFamily + " " + (bold ? "bold" : "normal");
-			var measure = ctx.measureText(str);
-			size = [measure.width, 10];
-		} else {
-			// first check if there is a string-measuring div available, if not, create now.
-			if (!stringMeasureEl) {
-				stringMeasureEl = DomUtils.createElement('iframe', {id:"_ComputeStylesIframe"}, {position:"absolute", visibility:"hidden", display:"none", width:"auto"});
-				document.body.appendChild(stringMeasureEl);
-				var doc = stringMeasureEl.contentWindow.document;
-				doc.open();
-				doc.write('<html><body><div id="sizeMeasuringDiv" style="position:absolute;width:auto;height:auto;white-space:pre-wrap;word-wrap:break-word;display:inline-block;"></div></body></html>');
-				doc.close();
-			}
-			stringMeasureEl.style.display = "";
-			var div = stringMeasureEl.contentWindow.document.getElementById("sizeMeasuringDiv");
-			div.style.fontSize = fontSize;
-			div.style.fontFamily = fontFamily;
-			div.style.fontWeight = bold ? 'bold' : 'normal';
-			div.style.padding = 0;
-			div.style.width = "auto";
-			div.innerHTML = str;
+		let strut = baselineDiv.firstChild;
+		let baselineHeight = strut.offsetTop + strut.offsetHeight - baselineDiv.offsetHeight - baselineDiv.offsetTop;
 
-			size = [div.offsetWidth, div.offsetHeight];
-			stringMeasureEl.style.display = "none";
-		}
-		return size;
+		return {width: measureDiv.offsetWidth, height: measureDiv.offsetHeight, baseline: baselineHeight};
 	}, function(str, fontSize, fontFamily, bold) { return str + ';' + fontSize + ';' + fontFamily + ';' + bold; });
 
 	/**
@@ -89,13 +73,14 @@ export default (function() {
 		fontFamily = fontFamily || 'Arial,Helvetica';
 		bold = !_.isUndefined(bold) ? bold: false;
 
-		var arr = [];
-		var spaceSize = getStringSize("&nbsp;", fontSize, fontFamily, bold), space = spaceSize[0];
-		arr.lineHeight = spaceSize[1];
+		let arr = [];
+		let spaceSize = getStringSize("&nbsp;", fontSize, fontFamily, bold), space = spaceSize.width;
+		arr.lineHeight = spaceSize.height;
+		arr.baseline = spaceSize.baseline;
 
 		if (!maxWidth || !string || string == "") {
 			arr.push(string);
-			arr.width = (!string || string == "") ? space : getStringSize(string, fontSize, fontFamily, bold)[0];
+			arr.width = (!string || string == "") ? space : getStringSize(string, fontSize, fontFamily, bold).width;
 			arr.height = arr.lineHeight;
 			return arr;
 		}
@@ -113,7 +98,7 @@ export default (function() {
 
 			for (var i = 0; i < words.length; i++) {
 				word = words[i];
-				wordWidth = getStringSize(word, fontSize, fontFamily, bold)[0];
+				wordWidth = getStringSize(word, fontSize, fontFamily, bold).width;
 
 				if ((newLine ? wordWidth : currentWidth + space + wordWidth) > maxWidth) {
 					if (newLine) {
@@ -169,7 +154,15 @@ export default (function() {
 	 * }
 	 * @returns {*}
 	 */
-	function getLabelBox(label, containerWidth, containerHeight, labelConfig = {}) {
+	function getLabelBox(label, labelConfig, containerWidth, containerHeight) {
+		return _getLabelBox.call(this, label, labelConfig, {width: containerWidth, height: containerHeight});
+	}
+
+	function getLabelBoxForLink(label, labelConfig, link) {
+		return _getLabelBox.call(this, label, labelConfig, link);
+	}
+
+	function _getLabelBox(label, labelConfig = {}, context) {
 		labelConfig = _.defaultsDeep(labelConfig, defaultConfig);
 		let fontSize = labelConfig.fontSize;
 		let fontFamily = labelConfig.fontFamily;
@@ -180,8 +173,10 @@ export default (function() {
 		let align = labelConfig.align;
 
 		let w = labelConfig.width, h = labelConfig.height;
-		w = w <= 5 ? containerWidth * w : w;
-		h = h <= 5 ? containerHeight * h : h;
+		if (context.width) {
+			w = w <= 5 ? context.width * w : w;
+			h = h <= 5 ? context.height * h : h;
+		}
 		w -= 2 * padding;
 		h -= 2 * padding;
 		w = Math.max(0, w);
@@ -207,7 +202,12 @@ export default (function() {
 				if (setAnchorX) geometry.anchorX = 0.5;
 				break;
 		}
-		let pos = Utils.getRelativePosition({width: containerWidth, height: containerHeight}, geometry);
+		let pos;
+		if (context.getRelativePosition)
+			pos = context.getRelativePosition(geometry);
+		else
+			pos = Utils.getRelativePosition({width: context.width, height: context.height}, geometry);
+
 		let bounds = new Rectangle(pos[0], pos[1], geometry.width, geometry.height);
 		// the pivot is the center of rotation when the label has a rotation specified.
 		let pivot = align == 'center' ? [0, 0] : (align == 'left' ? [-wrappedLabel.width/2, 0] : [wrappedLabel.width/2, 0]);
@@ -215,47 +215,17 @@ export default (function() {
 		// the maximum bounds for the label, used to position inline editor
 		geometry.width = Math.max(w + 2 * padding, geometry.width);
 		geometry.height = Math.max(h + 2 * padding, geometry.height);
-		pos = Utils.getRelativePosition({width: containerWidth, height: containerHeight}, geometry);
+
+		if (context.getRelativePosition)
+			pos = context.getRelativePosition(geometry);
+		else
+			pos = Utils.getRelativePosition({width: context.width, height: context.height}, geometry);
+
 		let maxBounds = new Rectangle(pos[0], pos[1], geometry.width, geometry.height);
-
 		return {
 			config: labelConfig, label: wrappedLabel, _label: label,
-			dx, dy: -geometry.height/2 + padding + wrappedLabel.lineHeight, anchor, lineHeight: wrappedLabel.lineHeight + linePadding,
+			dx, dy: -geometry.height/2 + padding + wrappedLabel.lineHeight - wrappedLabel.baseline, anchor, lineHeight: wrappedLabel.lineHeight + linePadding,
 			pivot, bounds, maxBounds
-		};
-	}
-
-	function getLabelBoxForLink(label, link, labelConfig) {
-		labelConfig = _.defaultsDeep(labelConfig, defaultConfig);
-		if (!label || label == "") return null;
-
-		let fontSize = labelConfig.fontSize;
-		let fontFamily = labelConfig.fontFamily;
-		let fontStyle = labelConfig.fontStyle;
-		let bold = (fontStyle & FONT_BOLD) == FONT_BOLD;
-
-		let wrappedLabel = this.wrap(label, labelConfig.width, fontSize, fontFamily, bold);
-		let pos = link.getRelativePosition({x: labelConfig.labelLocation/2, offsetX: labelConfig.labelOffsetX || 0, offsetY: labelConfig.labelOffsetY || 0});
-
-		let anchor = "start", dx;
-		switch (labelConfig.align) {
-			case "center":
-				anchor = "middle";
-				break;
-			case "right":
-				anchor = "end";
-				dx = wrappedLabel.width/2;
-				break;
-			case "left":
-			default:
-				dx = -wrappedLabel.width/2;
-				break;
-		}
-		return {
-			config: labelConfig, label: wrappedLabel, _label: label,
-			dx, dy: -wrappedLabel.height/2 + wrappedLabel.lineHeight,
-			anchor, lineHeight: wrappedLabel.lineHeight,
-			bounds: new Rectangle(pos[0], pos[1], wrappedLabel.width, wrappedLabel.height)
 		};
 	}
 
