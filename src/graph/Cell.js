@@ -76,8 +76,7 @@ export default class Cell {
 			id: this.id,
 			key: key,
 			className: this.computedClassName,
-			namespace: this.namespace,
-			scale: this.viewProp(key, 'scale') || 1.0
+			namespace: this.namespace
 		}, shape);
 	}
 
@@ -117,7 +116,7 @@ export default class Cell {
 	}
 
 	renderLabel(view) {
-		if (this == this.graph.getCurrentRoot())
+		if (this == this.graph.currentRoot)
 			return null;
 		let box = this.getLabelBox(view.id);
 		if (box)
@@ -153,7 +152,7 @@ export default class Cell {
 	}
 
 	get namespace() {
-		if (this == this.graph.getCurrentRoot()) return '';
+		if (this == this.graph.currentRoot) return '';
 		return "root." + this.prop("role");
 	}
 

@@ -83,7 +83,7 @@ class Graph {
 	/**
 	 * Create a new Node
 	 */
-	addNode(config, parent = this.getCurrentRoot(), pos) {
+	addNode(config, parent = this.currentRoot, pos) {
 		let NodeClass = Graph.getJSClass(config, Node);
 		let node = new NodeClass(this, config);
 
@@ -98,7 +98,7 @@ class Graph {
 		return node;
 	}
 
-	addEdge(config, parent = this.getCurrentRoot(), from, to) {
+	addEdge(config, parent = this.currentRoot, from, to) {
 		let EdgeClass = Graph.getJSClass(config, Edge);
 		let edge = new EdgeClass(this, config, from, to);
 
@@ -120,7 +120,7 @@ class Graph {
 		child.parent = parent;
 	}
 
-	loadModel(model, parent = this.getCurrentRoot()) {
+	loadModel(model, parent = this.currentRoot) {
 		var nodes = model.nodes;
 		var edges = model.edges;
 		delete model.nodes;
@@ -144,7 +144,7 @@ class Graph {
 		}
 	}
 
-	getCurrentRoot() {
+	get currentRoot() {
 		return this.root;
 	}
 

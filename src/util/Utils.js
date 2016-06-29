@@ -180,12 +180,11 @@ export default {
 
 	/**
 	 * Get the position relative to the graph that's unscaled, i.e., absolute position without considering translation and scale.
-	 * @param view the graph view object
+	 * @param t the current translate
+	 * @param scale the current scale
 	 * @param o can be either a Point or a Rectangle or a Point array.
 	 */
-	unscale: function(view, o) {
-		var scale = view.scale();
-		var t = view.translate();
+	unscale: function(t, scale, o) {
 		if (o instanceof Rectangle)
 			return new Rectangle(o.x*scale+t[0], o.y*scale+t[1], o.width*scale, o.height*scale);
 		else if (o instanceof Point)
@@ -196,12 +195,11 @@ export default {
 
 	/**
 	 * Get the position relative to the graph that's scaled, i.e., relative position considering translation and scale.
-	 * @param view the graph view object
+	 * @param t the current translation
+	 * @param scale the current scale
 	 * @param o can be either a Point or a Rectangle or a Point array.
 	 */
-	scale: function(view, o) {
-		var scale = view.scale();
-		var t = view.translate();
+	scale: function(t, scale, o) {
 		if (o instanceof Rectangle)
 			return new Rectangle((o.x-t[0])/scale, (o.y-t[1])/scale, o.width/scale, o.height/scale);
 		else if (o instanceof Point)
@@ -213,13 +211,13 @@ export default {
 	/**
 	 * Convenience method.
 	 */
-	getObjProperty: function(obj, prop) {
+	getProperty: function(obj, prop) {
 		if (!obj)
 			return null;
 		if (_.has(obj, prop))
 			return obj[prop];
-		if (obj.getProperty && _.isFunction(obj.getProperty))
-			return obj.getProperty(prop);
+		if (obj.prop && _.isFunction(obj.prop))
+			return obj.prop(prop);
 		return null;
 	}
 };

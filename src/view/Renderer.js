@@ -5,12 +5,13 @@ import DomUtils from "../util/DomUtils";
 import Layout from "../layout/Layout";
 import Rectangle from "../geometry/Rectangle";
 import EventDispatcher from "../event/EventDispatcher";
+import GraphBehavior from "../behavior/GraphBehavior";
 import Label from "./Label";
 
 class Renderer {
-	constructor(id, container, config = {}) {
+	constructor(id, container, config = {}, graph = null) {
 		this.id = id;
-		this.box = DomUtils.createElement('div', {id:this.id, tabindex:0}, {overflow: "hidden", width: "100%", height: "100%", position: 'relative'});
+		this.box = DomUtils.createElement('div', {id: this.id, tabindex: 0, ns: 'graph'}, {overflow: "hidden", width: "100%", height: "100%", position: 'relative'});
 		container.appendChild(this.box);
 		if (config.layout) {
 			let layoutClass = Utils.getConstructor(config.layout.jsClass, Layout);
@@ -18,8 +19,15 @@ class Renderer {
 			delete config.layout;
 		}
 		this.clear = true;
-		this._graph = null;
+		this._translate = [0, 0];
+		this._scale = 1.0;
+		this.graph = graph;
 		this.dispatcher = null;
+		this.graphBehavior = null;
+		this.selectionBehavior = null;
+		this.nodeBehavior = null;
+		this.edgeBehavior = null;
+		this.connectionBehavior = null;
 		Utils.initConfig(this, config);
 
 		Events.on(Label.editor, 'editor.update.*', function(key, value) {
@@ -27,12 +35,17 @@ class Renderer {
 		});
 	}
 
-	graph(graph) {
-		if (graph) {
-			this._graph = graph;
-			return this;
-		}
+	get graph() {
 		return this._graph;
+	}
+
+	set graph(graph) {
+		this._graph = graph;
+		let root = graph.currentRoot;
+		if (root) {
+			this._translate = [root.viewProp(this.id, 'x') || 0, root.viewProp(this.id, 'y') || 0];
+			this._scale = root.viewProp(this.id, 'scale') || 1.0;
+		}
 	}
 
 	viewport(scaled, viewport) {
@@ -40,41 +53,25 @@ class Renderer {
 		if (!viewport) {
 			var vp = new Rectangle(0, 0, this.box.offsetWidth, this.box.offsetHeight);
 			if (scaled)
-				return Utils.scale(this, vp);
+				return Utils.scale(this.translate, this.scale, vp);
 			return vp;
 		}
-		if (!scaled) viewport = Utils.scale(this, viewport);
+		if (!scaled) viewport = Utils.scale(this.translate, this.scale, viewport);
 		var w = this.box.offsetWidth;
 		var scale = w / viewport.width;
 		this.transform(-viewport.x*scale, -viewport.y*scale, scale);
 	}
 
-	translate(t) {
-		if (!this._graph) return [0, 0];
-		if (!arguments.length) {
-			var root = this._graph.getCurrentRoot();
-			if (!root)
-				return [0, 0];
-			return [root.viewProp(this.id, 'x') || 0, root.viewProp(this.id, 'y') || 0];
-		}
-		this.transform(t[0], t[1]);
-	}
-
-	scale(k) {
-		if (!this._graph) return 1.0;
-		if (!arguments.length) {
-			var root = this._graph.getCurrentRoot();
-			if (!root) return 1.0;
-
-			return root.viewProp(this.id, 'scale') || 1.0;
-		}
-
+	get translate() { return this._translate; }
+	set translate(t) { this.transform(t[0], t[1]); }
+	get scale() { return this._scale; }
+	set scale(k) {
 		switch (k) {
 			case "in":
-				k = this.scale() * this.prop("zoomFactor");
+				k = this.scale * this.prop("zoomFactor");
 				break;
 			case "out":
-				k = this.scale() / this.prop("zoomFactor");
+				k = this.scale / this.prop("zoomFactor");
 				break;
 			case "actual":
 				k = 1.0;
@@ -100,34 +97,45 @@ class Renderer {
 		this.transform(null, null, k);
 	}
 
-	transform(x, y, scale) {
-		if (!this._graph) return;
-		var root = this._graph.getCurrentRoot();
-		if (!root) return;
-
-		/*if (!_.isNull(x) && !_.isNull(y))
-			root.move(x, y);
-		if (scale) {
-			scale = Math.max(this.getProperty("minZoom"), Math.min(this.getProperty("maxZoom"), scale));
-			root.setProperty('scale', scale);
-			// sync the scale between the zoom behavior and the graph
-			var zoom = this.eventDispatcher.zoom;
-			if (zoom.scale() != scale)
-				zoom.scale(scale);
+	transform(x = null, y = null, scale = null) {
+		let graph = this.graph;
+		let root = graph ? graph.currentRoot : null;
+		if (!_.isNull(x)) {
+			this._translate[0] = x;
+			if (root)
+				root.viewProp(this.id, 'x', x);
 		}
-
-		this.trigger(Graph.EVENT_TYPES.REFRESH);*/
+		if (!_.isNull(y)) {
+			this._translate[1] = y;
+			if (root)
+				root.viewProp(this.id, 'y', y);
+		}
+		if (!_.isNull(scale)) {
+			this._scale = scale;
+			if (root)
+				root.viewProp(this.id, 'scale', scale);
+			// sync the scale between the dispatcher and the graph
+			let s = this.dispatcher.scale;
+			if (s != scale)
+				this.dispatcher.scale = scale;
+		}
+		this.refresh();
 	}
 
 	render() {
 		if (!this._graph) return false;
 		// intialize views
 		if (this.layout)
-			this.layout.layout(this._graph.getCurrentRoot(), this.viewport());
+			this.layout.layout(this._graph.currentRoot, this.viewport());
 
 		// create the event dispatcher if necessary.
 		if (!this.dispatcher) {
-			this.dispatcher = new EventDispatcher(this.box);
+			this.dispatcher = new EventDispatcher(this.box, [this.prop('minZoom'), this.prop('maxZoom')]);
+			let jsClass;
+			if (this.prop('graphBehavior')) {
+				jsClass = Utils.getConstructor(this.prop('graphBehavior'));
+				this.graphBehavior = new jsClass(this);
+			}
 			this.dispatcher.register('mouseup.node.label', function(type, ns, target, pos, event) {
 				let node = this._graph.nodes[target.getAttribute('id')];
 				if (!this.dispatcher.dragging && !node._firstSelection) {
@@ -160,6 +168,8 @@ class Renderer {
 	renderMarkers(markers) {
 		return this.constructor.renderMarkers(markers);
 	}
+
+	refresh() {}
 
 	/**
 	 * Get the template for the specified key.
@@ -201,7 +211,8 @@ Renderer.DEFAULTS = {
 	maxZoom: 4.0,
 	minZoom: 0.1,
 	zoomFactor: 1.2,
-	maskOpacity: 0.5
+	maskOpacity: 0.5,
+	graphBehavior: GraphBehavior
 };
 
 export default Renderer;

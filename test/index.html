@@ -98,7 +98,7 @@ var graph;
 
 function startViewer() {
 	graph = new qg.Graph('myGraph', graphConfig, model);
-	new qg.SVGRenderer('default', document.getElementById('graph-demo'), viewConfig).graph(graph).render();
+	new qg.SVGRenderer('default', document.getElementById('graph-demo'), viewConfig, graph).render();
 }
 
 function destroyViewer(){

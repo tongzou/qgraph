@@ -20,6 +20,7 @@ import Label from "./view/Label";
 import Marker from "./view/Marker";
 import Renderer from "./view/Renderer";
 import SVGRenderer from "./view/SVGRenderer";
+import GraphBehavior from "./behavior/GraphBehavior";
 
 Shape.addShape("Rectangle", Rectangle);
 Shape.addShape("Ellipse", Ellipse);
@@ -46,5 +47,6 @@ export default {
 	Layout,
 	FlowLayout,
 	Renderer,
-	SVGRenderer
+	SVGRenderer,
+	GraphBehavior
 };

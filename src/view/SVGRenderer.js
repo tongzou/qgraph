@@ -3,27 +3,39 @@ import DomUtils from "../util/DomUtils";
 import Renderer from "./Renderer";
 import StringBuffer from "../util/StringBuffer";
 
+const NS = 'http://www.w3.org/2000/svg';
+
 class SVGRenderer extends Renderer {
 	render() {
 		let result = super.render();
 		if (result) {
-			var root = this._graph.getCurrentRoot();
-			var buf = new StringBuffer('<svg width="100%" height="100%">');
+			let root = this.graph.currentRoot;
+			let buf = new StringBuffer('<svg width="100%" height="100%">');
 			buf.append(this.renderDefs());
+			let t = this.translate;
+			buf.append('<g transform="translate(').append(t[0]).append(',').append(t[1]).append(')scale(').append(this.scale).append(')">');
 			buf.append(root.render(this));
-			buf.append('</svg>');
-			this.box.innerHTML = buf.toString();
+			buf.append('</g></svg>');
+			SVGRenderer.setContent(this.box, buf.toString());
+			this.svg = this.box.firstElementChild;
 		}
 	}
 
 	renderDefs() {
 		let buf = new StringBuffer('<defs>');
 		buf.append(this.getTemplate('Grid', this.prop("gridSize")));
-		let markers = this.graph().markers;
+		let markers = this.graph.markers;
 		if (markers.length > 0)
 			buf.append(SVGRenderer.renderMarkers(markers));
 		buf.append('</defs>');
 		return buf.toString();
+	}
+
+	refresh() {
+		if (!this.svg) return;
+		let g = this.svg.querySelector('g');
+		let t = this.translate;
+		g.setAttribute('transform', 'translate(' + t[0] + ',' + t[1] + ')scale(' + this.scale + ')');
 	}
 
 	static renderMarkers(markers) {
@@ -133,7 +145,7 @@ class SVGRenderer extends Renderer {
 	}
 }
 SVGRenderer.TEMPLATES = {
-	$root: '<g id="${id}" class="${className}" ns="graph" transform="translate(${x},${y})scale(${scale})">#{children}</g>',
+	$root: '<g id="${id}" class="${className}">#{children}</g>',
 	$node: '<g id="${id}" class="${className}" ns="${namespace}" transform="translate(${x},${y})">#{shape}#{label}</g>',
 	$edge: '<g id="${id}" class="${className}" ns="${namespace}">#{shape}#{label}</g>',
 	Ellipse: '<ellipse cx="0" cy="0" rx="${width/2}" ry="${height/2}"/>',

@@ -5,16 +5,21 @@ import DomUtils from "../util/DomUtils";
 import Utils from "../util/Utils";
 import StringBuffer from "./../util/StringBuffer";
 
+const DEFAULTS = {
+	stopPropagation: false
+};
+
 export default class EventDispatcher {
 	/**
 	 * Constructor
 	 * @param root the root element that the manager will listen to.
 	 * @param zoomScale
 	 */
-	constructor(root, zoomScale = [0, Infinity]) {
+	constructor(root, zoomScale = [0, Infinity], config = {}) {
 		this.root = root;
 		this.rootNS = root.getAttribute('ns') || 'root';
 		this.zoomScale = zoomScale;
+		_.assign(this, DEFAULTS, config);
 		this.scale = 1.0;
 		this.listeners = {};
 		this.dragging = false;
@@ -230,8 +235,8 @@ export default class EventDispatcher {
 		});
 
 		// after dispatching, do not propagate.
-		//if (event.stopPropagation)
-		//	event.stopPropagation();
+		if (this.stopPropagation && event.stopPropagation)
+			event.stopPropagation();
 	}
 
 	getPosition(event) {
