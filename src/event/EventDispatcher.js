@@ -2,7 +2,6 @@ import _ from "lodash";
 import Events from "bean";
 import * as KeyUtils from "./KeyUtils";
 import DomUtils from "../util/DomUtils";
-import Utils from "../util/Utils";
 import StringBuffer from "./../util/StringBuffer";
 
 const DEFAULTS = {

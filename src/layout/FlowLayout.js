@@ -1,5 +1,4 @@
 import Layout from "./Layout";
-import Events from "bean";
 
 class FlowLayout extends Layout {
 	layout(root, bounds) {

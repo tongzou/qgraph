@@ -5,6 +5,7 @@ import _ from "lodash";
  */
 export default {
 	isIE: (function () {
+		if (!window || !window.navigator || !navigator) return false;
 		var sAgent = window.navigator.userAgent;
 		var Idx = sAgent.indexOf("MSIE");
 
