@@ -38,6 +38,10 @@ class SVGRenderer extends Renderer {
 		g.setAttribute('transform', 'translate(' + t[0] + ',' + t[1] + ')scale(' + this.scale + ')');
 	}
 
+	toDataURL(format, options) {
+		SVGRenderer.toDataURL(this.svg, format, options);
+	}
+
 	static renderMarkers(markers) {
 		let buf = new StringBuffer(), str1, str2;
 		for (let marker of markers) {
@@ -122,6 +126,17 @@ class SVGRenderer extends Renderer {
 		return buf.toString();
 	}
 
+	static toDataURL(svg, format, options) {
+		if (!canvg) return null;
+		var bbox = svg.getBBox();
+		var canvas = DomUtils.createElement('canvas');
+		document.body.appendChild(canvas);
+		canvg(canvas, '<svg style="width: ' + bbox.width + 'px; height: ' + bbox.height + 'px;"><g transform="translate(' + bbox.width / 2 + ',' + bbox.height / 2 + ')scale(' + this.transform.scale  + ')">' + $(this.g.node()).prop('innerHTML') + '</g></svg>');
+		var image = canvas.toDataURL(format);
+		document.body.removeChild(canvas);
+		return image;
+	}
+
 	static appendContent(el, content) {
 		let buf = new StringBuffer();
 		buf.append('<svg>').append(content).append('</svg');
@@ -174,7 +189,7 @@ SVGRenderer.TEMPLATES = {
 		return `
 <marker id="${marker.id}" markerWidth="${marker.size}" markerHeight="${marker.size}" refx="${marker.ref[0]}" 
 refy="${marker.ref[1]}" orient="auto" viewbox="${marker.viewBox.x} ${marker.viewBox.y} ${marker.viewBox.width} ${marker.viewBox.height}"
-markerUnits="userSpaceOnUse" ${marker.fill ? `style="fill:${marker.fill}"` : ''}>#{shape}</marker>
+markerUnits="userSpaceOnUse" ${marker.fill ? `style="stroke: ${marker.fill};fill:${marker.fill}"` : ''}>#{shape}</marker>
 `.trim();
 	},
 	Grid: function(size) {

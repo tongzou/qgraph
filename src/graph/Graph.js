@@ -25,7 +25,8 @@ const edgeDefaults = {
 	endMarker: {
 		id: 'Default_EndMarker',
 		type: 'arrow',
-		size: 10
+		size: 10,
+		color: '#0ea117'
 	},
 	/* start and end is only used if the edge is not connected to a node */
 	start: [0, 0],

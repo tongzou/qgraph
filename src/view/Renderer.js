@@ -142,7 +142,7 @@ class Renderer {
 					Label._delayEdit = _.delay(() => {
 						if (Label._delayEdit) {
 							delete Label._delayEdit;
-							Label.editor.start(node.id, this.box, node.getLabelBox(this.id), target, event.nsTarget);
+							Label.editor.start(node.id, this.box, node.getLabelBox(this.id), target, event.nsTarget, this.scale);
 						}
 					}, 250);
 				}
@@ -197,8 +197,18 @@ class Renderer {
 		return t;
 	}
 
+	toDataURL(format, options) {}
 	reset() {}
-	destroy() {}
+
+	destroy() {
+		delete this._graph;
+		delete this.layout;
+		if (this.dispatcher) {
+			this.dispatcher.stop();
+			delete this.dispatcher;
+		}
+		this.box.innerHTML = '';
+	}
 }
 Renderer.DEFAULTS = {
 	defaultClickMode: "pan",
@@ -209,7 +219,7 @@ Renderer.DEFAULTS = {
 	guidesEnabled: true,
 	gridSize: 30,
 	maxZoom: 4.0,
-	minZoom: 0.1,
+	minZoom: 0.2,
 	zoomFactor: 1.2,
 	maskOpacity: 0.5,
 	graphBehavior: GraphBehavior

@@ -14,14 +14,7 @@
 <input type="button" value="Test Image Capture" onclick="testImageCapture()">
 <input type="button" value="Start Viewer" onclick="startViewer()"/>
 <input type="button" value="Destroy Viewer" onclick="destroyViewer()"/>
-<input type="button" value="Start Dispatcher" onclick="enableDispatcher(true)"/>
-<input type="button" value="Stop Dispatcher" onclick="enableDispatcher(false)"/>
-<div id="graph-demo" style="position:absolute;left:20px;right:20px;top:20px;bottom:20px;margin-top:50px">
-	<!--div ns="root.node" data="node1" style="position:absolute;left:100px;top:100px;background-color:#0e72b5; width:120px; height:60px"><div ns="label">my label1</div></div>
-
-	<div ns="root.node" data="node2" style="position:absolute;left:300px;top:100px;background-color:#0e72b5; width:120px; height:60px"><div ns="label">my label2</div></div>
-	-->
-</div>
+<div id="graph-demo" style="position:absolute;left:10px;right:10px;top:10px;bottom:10px;margin-top:20px"></div>
 <script type="text/javascript">
 var qg = window["qgraph"].default;
 var graphConfig = {
@@ -170,24 +163,6 @@ function testPerformance() {
 		classes.push(new myClass("name" + i));
 	var end = new Date().getTime();
 	alert((end-start)/1000);
-}
-
-var dispatcher;
-function enableDispatcher(enable) {
-	if (enable) {
-		if (!dispatcher) {
-			dispatcher = new qg.EventDispatcher(document.getElementById('graph-demo'), "testing", [0.5, 4]);
-			dispatcher.register('drag*', function(type, ns, data, pos, event) {
-				console.log('type=' + type + ';ns=' + ns + ';data=' + data.getAttribute('data') + ';pos=' + pos + ';event data=' + event.rootTarget.getAttribute('data'));
-			});
-			dispatcher.register('zoom*', function(type, ns, data, pos, event) {
-				console.log(type + ' ' + ns + ' ' + data + ' ' + event.scale);
-			});
-		}
-		dispatcher.start();
-	} else if (dispatcher) {
-		dispatcher.stop();
-	}
 }
 </script>
 </body>

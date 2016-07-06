@@ -4,7 +4,7 @@ import Utils from "../util/Utils";
 
 let defaultConfig = {
 	type: "direct",
-	showGauge: false,
+	showGauge: true,
 	orthogonal: false
 };
 

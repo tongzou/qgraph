@@ -236,7 +236,7 @@ export default (function() {
 	let editor = {
 		visible: function() { return this.input && this.input.style.visibility == 'visible'; },
 
-		start: function(key, container, box, refEl, textEl) {
+		start: function(key, container, box, refEl, textEl, scale = 1.0) {
 			if (!this.input) {
 				this.input = DomUtils.createElement('textarea', {id:"inlineEditor", unselectable:"off"}, {position:"absolute", overflow:"hidden", padding:"0px", margin:"0px", border:"transparent"});
 				container.appendChild(this.input);
@@ -250,10 +250,9 @@ export default (function() {
 			this.textEl = textEl;
 
 			let labelConfig = box.config;
-			//let pos = Utils.unscale(graph, [cell.getBounds().getCenterX() + bounds.x, cell.getBounds().getCenterY() + bounds.y + 5]);
+			let maxBounds = new Rectangle(box.maxBounds.x, box.maxBounds.y, box.maxBounds.width * scale, box.maxBounds.height * scale);
 			let pos = DomUtils.getCenterPosition(refEl, container);
-			pos = [pos[0] + box.maxBounds.left, pos[1] + box.maxBounds.top];
-			let scale = 1.0;
+			pos = [pos[0] + maxBounds.left, pos[1] + maxBounds.top];
 
 			if (textEl)
 				textEl.style.visibility = 'hidden';
@@ -262,8 +261,8 @@ export default (function() {
 				visibility: 'visible',
 				left: pos[0] + "px",
 				top: pos[1] + "px",
-				width: (box.maxBounds.width * scale) + 'px',
-				height: (box.maxBounds.height * scale) + 'px',
+				width: maxBounds.width + 'px',
+				height: maxBounds.height + 'px',
 				"font-family": labelConfig.fontFamily,
 				"font-size": (labelConfig.fontSize * scale) + 'px',
 				"font-weight": (labelConfig.fontStyle & FONT_BOLD) == FONT_BOLD ? 'bold' : 'normal'

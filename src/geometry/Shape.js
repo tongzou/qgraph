@@ -54,7 +54,7 @@ class Shape {
 	}
 
 	render(view) {
-		let template = _.template(view.getTemplate(this.constructor.name, this));
+		let template = _.template(view.getTemplate(this.name, this));
 		return template(this);
 	}
 
