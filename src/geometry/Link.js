@@ -209,8 +209,9 @@ class Manhattan extends Link {
 	}
 
 	get points() {
-		let pos = Manhattan.routeInternal(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
-		pos = Manhattan.processPositions(this.start, this.end, pos, this.startNormal.x!=0);
+		//let pos = Manhattan.routeInternal(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
+		//pos = Manhattan.processPositions(this.start, this.end, pos, this.startNormal.x!=0);
+		let pos = Manhattan.findPositions(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
 		if (this.autoRoute) {
 			this._mergeSegments(pos);
 			var boxes = [], node, startBox, endBox;
@@ -233,6 +234,73 @@ class Manhattan extends Link {
 		}
 		this._mergeSegments(pos);
 		return pos;
+	}
+
+	//New function for finding route
+	static findPositions(start, end, startNormal, endNormal, buffer) {
+		var startBuffer = new Point(start.x + startNormal.x * buffer, start.y + startNormal.y * buffer);
+		var endBuffer = new Point(end.x + endNormal.x * buffer, end.y + endNormal.y * buffer);
+		var startBufferNormal, endBufferNormal;
+		var pts;
+		if (startNormal.x != 0) {
+			if ((endBuffer.x - startBuffer.x) / startNormal.x > 0) {
+				startBufferNormal = startNormal;
+			}
+			else {
+				startBufferNormal = new Point(0, (endBuffer.y >= startBuffer.y) ? 1 : -1);
+			}
+		}
+		else {
+			if ((endBuffer.y - startBuffer.y) / startNormal.y > 0) {
+				startBufferNormal = startNormal;
+			}
+			else {
+				startBufferNormal = new Point((endBuffer.x >= startBuffer.x) ? 1 : -1, 0);
+			}
+		}
+		if (endNormal.x != 0) {
+			if ((startBuffer.x - endBuffer.x) / endNormal.x > 0) {
+				endBufferNormal = endNormal;
+			}
+			else {
+				endBufferNormal = new Point(0, (startBuffer.y >= endBuffer.y) ? 1 : -1);
+			}
+		}
+		else {
+			if ((startBuffer.y - endBuffer.y) / endNormal.y > 0) {
+				endBufferNormal = endNormal;
+			}
+			else {
+				endBufferNormal = new Point((startBuffer.x >= endBuffer.x) ? 1 : -1, 0);
+			}
+		}
+
+		if (startBufferNormal.dotProduct(endBufferNormal) == 0) {
+			var middle = (startBufferNormal.x == 0) ? new Point(startBuffer.x, endBuffer.y) : new Point(endBuffer.x, startBuffer.y);
+			pts = [start, startBuffer, middle, endBuffer, end];
+		}
+		else if (startBufferNormal.dotProduct(endBufferNormal) < 0) {
+			if (startBufferNormal.x == 0) {
+				pts = [start, startBuffer, new Point(startBuffer.x, (start.y + end.y) / 2), new Point(endBuffer.x, (start.y + end.y) / 2), endBuffer, end];
+			}
+			else {
+				pts = [start, startBuffer, new Point((start.x + end.x) / 2, startBuffer.y), new Point((start.x + end.x) / 2, endBuffer.y), endBuffer, end];
+			}
+		}
+		else {
+			pts = [start, startBuffer, new Point(startBuffer.x + startBufferNormal.x * buffer, startBuffer.y + startBufferNormal.y * buffer), new Point(endBuffer.x + endBufferNormal.x * buffer, endBuffer.y + endBufferNormal.y * buffer), endBuffer, end];
+		}
+
+		var prunePts = [];
+		prunePts[0] = pts[0];
+		for (var i = 1; i < pts.length - 1; i++) {
+			if ((pts[i].x == pts[i-1].x && pts[i].x == pts[i+1].x) || (pts[i].y == pts[i-1].y && pts[i].y == pts[i+1].y)) {
+				continue;
+			}
+			prunePts.push(pts[i]);
+		}
+		prunePts.push(pts[pts.length - 1]);
+		return prunePts;
 	}
 
 	/**

@@ -13,10 +13,10 @@ describe('ManhattanLink', function() {
 		var qg = require('../dist/qgraph').default;
 		var input = [{point: new qg.Point(150, 40), direction: qg.Point.W}, {point: new qg.Point(0, -40), direction: qg.Point.W}];
 		var link = qg.Link.getLink(input, {type: 'manhattan', MIN_BUFFER: 15});
-		expect(link.points).to.eql([new qg.Point(150, 40), new qg.Point(-15, 40), new qg.Point(-15, -14), new qg.Point(0, -40)]);
+		expect(link.points).to.eql([new qg.Point(150, 40), new qg.Point(-15, 40), new qg.Point(-15, -40), new qg.Point(0, -40)]);
 
-		/*input = [];
+		input = [{point: new qg.Point(150, 40), direction: qg.Point.S}, {point: new qg.Point(150, -40), direction: qg.Point.N}];
 		link = qg.Link.getLink(input, {type: 'manhattan', MIN_BUFFER: 15});
-		expect();*/
+		expect(link.points).to.eql([new qg.Point(150, 40), new qg.Point(150, 55), new qg.Point(150, -55), new qg.Point(150, -40)]);
 	});
 });
