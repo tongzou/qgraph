@@ -1,4 +1,3 @@
-import Events from "bean";
 import Base64 from "./util/base64";
 import Cache from "./util/Utils";
 import Utils from "./util/Utils";
@@ -10,6 +9,7 @@ import Shape from "./geometry/Shape";
 import Rectangle from "./geometry/Rectangle";
 import Ellipse from "./geometry/Ellipse";
 import Link from "./geometry/Link";
+import Events from "bean";
 import EventDispatcher from "./event/EventDispatcher";
 import Graph from "./graph/Graph";
 import Cell from "./graph/Cell";

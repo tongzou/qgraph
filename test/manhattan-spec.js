@@ -3,11 +3,6 @@
  */
 var expect = require('chai').expect;
 
-// bean requires the existence of window
-global.window = { addEventHandler: function() {} };
-global.document = {};
-global.navigator = {};
-
 describe('ManhattanLink', function() {
 	it('should route', function() {
 		var qg = require('../dist/qgraph').default;
@@ -17,6 +12,6 @@ describe('ManhattanLink', function() {
 
 		input = [{point: new qg.Point(150, 40), direction: qg.Point.S}, {point: new qg.Point(150, -40), direction: qg.Point.N}];
 		link = qg.Link.getLink(input, {type: 'manhattan', MIN_BUFFER: 15});
-		expect(link.points).to.eql([new qg.Point(150, 40), new qg.Point(150, 55), new qg.Point(150, -55), new qg.Point(150, -40)]);
+		expect(link.points).to.eql([new qg.Point(150, 40), new qg.Point(150, 55), new qg.Point(165, 55), new qg.Point(165, -55), new qg.Point(150, -55), new qg.Point(150, -40)]);
 	});
 });
