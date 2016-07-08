@@ -1,4 +1,5 @@
 import Events from "bean";
+import Base64 from "./util/base64";
 import Cache from "./util/Utils";
 import Utils from "./util/Utils";
 import DomUtils from "./util/DomUtils";
@@ -27,6 +28,7 @@ Shape.addShape("Ellipse", Ellipse);
 
 export default {
 	Events,
+	Base64,
 	Cache,
 	Utils,
 	DomUtils,

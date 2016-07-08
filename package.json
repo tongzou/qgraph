@@ -1,6 +1,6 @@
 {
   "name": "qgraph",
-  "version": "0.0.5",
+  "version": "0.1.2",
   "description": "A Graph Manipulation and Visualization Library",
   "main": "dist/qgraph.js",
   "repository": {

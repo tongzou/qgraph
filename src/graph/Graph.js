@@ -48,18 +48,18 @@ class Graph {
 		// check for markers.
 		this.markers = [];
 		let edgeTypes = Utils.type(Edge.namespace), marker, markerConfig;
-		for (let type of edgeTypes.entries()) {
-			markerConfig = type[1].prototype.startMarker;
+		edgeTypes.forEach(function(type) {
+			markerConfig = type.prototype.startMarker;
 			if (markerConfig) {
 				marker = Marker.getMarker(markerConfig, true);
 				this.markers.push(marker);
 			}
-			markerConfig = type[1].prototype.endMarker;
+			markerConfig = type.prototype.endMarker;
 			if (markerConfig) {
 				marker = Marker.getMarker(markerConfig, false);
 				this.markers.push(marker);
 			}
-		}
+		}, this);
 
 		delete config.nodeTypes;
 		delete config.edgeTypes;

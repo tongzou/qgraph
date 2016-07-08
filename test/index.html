@@ -87,11 +87,12 @@ var model = {
 
 
 qg.Utils.debug();
-var graph;
+var graph, renderer;
 
 function startViewer() {
 	graph = new qg.Graph('myGraph', graphConfig, model);
-	new qg.SVGRenderer('default', document.getElementById('graph-demo'), viewConfig, graph).render();
+	renderer = new qg.SVGRenderer('default', document.getElementById('graph-demo'), viewConfig, graph);
+	renderer.render();
 }
 
 function destroyViewer(){
@@ -141,7 +142,8 @@ function testUpdate() {
 }
 
 function testImageCapture() {
-    ViewerManager.executeAction("saveFlowImage");
+	var image = renderer.svg.toDataURL('image/png', { keepOutsideViewport: true, debug: true, padding: 20});
+	qg.DomUtils.downloadImage('graph', image);
 }
 
 

@@ -1,22 +1,194 @@
 import _ from "lodash";
+import Base64 from "../util/base64";
 import DomUtils from "../util/DomUtils";
 import Renderer from "./Renderer";
 import StringBuffer from "../util/StringBuffer";
 
 const NS = 'http://www.w3.org/2000/svg';
+if (typeof (SVGElement) != "undefined") {
+	var svg = document.createElementNS(NS, "svg");
+	svg.innerHTML = '<circle/>';
+	if (svg.firstChild !== "[object SVGCircleElement]") {
+		Object.defineProperties(SVGElement.prototype, {
+			"outerHTML": {
+				enumerable: false,
+				configurable: true,
+				get: function() {
+					var $node, $temp;
+					$temp = document.createElement('div');
+					$node = this.cloneNode(true);
+					$temp.appendChild($node);
+					return $temp.innerHTML;
+				}
+			},
+			"innerHTML": {
+				enumerable: false,
+				configurable: true,
+				get: function() {
+					var s = this.outerHTML;
+					var ropen = new RegExp("<" + this.nodeName + '\\b(?:(["\'])[^"]*?(\\1)|[^>])*>', "i");
+					var rclose = new RegExp("<\/" + this.nodeName + ">$", "i");
+					return  s.replace(ropen, "").replace(rclose, "");
+				},
+				set: function(markup) {
+					// empty el first.
+					let child;
+					while (child = this.lastChild)
+						this.removeChild(child);
+					let buf = new StringBuffer();
+					buf.append('<svg>').append(markup).append('</svg');
+					let $temp = DomUtils.createElement('div', null, null, buf.toString()).firstElementChild;
+					while ($temp.firstChild)
+						this.appendChild($temp.firstChild);
+				}
+			}
+		})
+	}
+	// Define the toDataURL for SVG
+	SVGElement.prototype.toDataURL = function(type, options = {}) {
+		let _svg = this;
+
+		let debug = function(msg) {};
+
+		if (options['debug'] == true && typeof(console) != 'undefined')
+			debug = function(msg) { console.log("SVG.toDataURL:", msg); };
+
+		function exportSVG() {
+			var svg_xml = _svg.outerHTML;
+			var svg_dataurl = base64dataURLencode(svg_xml);
+			debug(type + " length: " + svg_dataurl.length);
+
+			// NOTE double data carrier
+			if (options.callback) options.callback(svg_dataurl);
+			return svg_dataurl;
+		}
+
+		function base64dataURLencode(s) {
+			var b64 = "data:image/svg+xml;base64,";
+
+			// https://developer.mozilla.org/en/DOM/window.btoa
+			if (window.btoa) {
+				debug("using window.btoa for base64 encoding");
+				b64 += btoa(s);
+			} else {
+				debug("using custom base64 encoder");
+				b64 += Base64.encode(s);
+			}
+
+			return b64;
+		}
+
+		// Native export doesn't work very well. should use canvg instead.
+		function exportImage(type) {
+			var canvas = document.createElement("canvas");
+			var ctx = canvas.getContext('2d');
+
+			// TODO: if (options.keepOutsideViewport), do some translation magic?
+
+			var svg_img = new Image();
+			var svg_xml = _svg.outerHTML;
+			svg_img.src = base64dataURLencode(svg_xml);
+
+			svg_img.onload = function() {
+				debug("exported image size: " + [svg_img.width, svg_img.height]);
+				canvas.width = svg_img.width;
+				canvas.height = svg_img.height;
+				ctx.drawImage(svg_img, 0, 0);
+
+				// SECURITY_ERR WILL HAPPEN NOW
+				var image_dataurl = canvas.toDataURL(type);
+				debug(type + " length: " + image_dataurl.length);
+
+				if (options.callback) options.callback( image_dataurl );
+				else debug("WARNING: no callback set, so nothing happens.");
+			};
+
+			svg_img.onerror = function() {
+				debug(
+					"Can't export! Maybe your browser doesn't support " +
+					"SVG in img element or SVG input for Canvas drawImage?\n" +
+					"http://en.wikipedia.org/wiki/SVG#Native_support"
+				);
+			};
+
+			// NOTE: will not return anything
+		}
+
+		function exportImageCanvg(type) {
+			if (!canvg) return null;
+			let canvas = DomUtils.createElement('canvas', null, {display: "none"});
+			document.body.appendChild(canvas);
+			if (!options.keepOutsideViewport) {
+				canvg(canvas, _svg.outerHTML);
+			} else {
+				let padding = options.padding || 0;
+				let scale = 1.0;
+				let translate = [0, 0];
+				let bbox = _svg.getBBox();
+				debug("detected svg dimensions " + [bbox.x, bbox.y, bbox.width, bbox.height]);
+				let transform = _svg.firstElementChild.getAttribute('transform');
+				if (transform) {
+					debug('detected svg transform ' + transform);
+					transform = SVGRenderer.transform(transform);
+					translate = transform.translate;
+					scale = transform.scale;
+				}
+				let buf = new StringBuffer();
+				buf.append('<svg width="').append(bbox.width + 2*padding).append('px" height="').append(bbox.height + 2*padding).append('px"><g transform="translate(')
+					.append(-bbox.x+translate[0]+padding).append(',').append(-bbox.y+translate[1]+padding).append(')scale(').append(scale).append(')">')
+					.append(_svg.firstElementChild.innerHTML).append('</g></svg>');
+				canvg(canvas, buf.toString());
+			}
+			var image_dataurl = canvas.toDataURL(type);
+			if (options.callback) options.callback( image_dataurl );
+			canvas.parentNode.removeChild(canvas);
+			return image_dataurl;
+		}
+
+		if (!type) type = "image/svg+xml";
+
+		if (options.keepNonSafe) debug("NOTE: keepNonSafe is NOT supported and will be ignored!");
+		if (options.keepOutsideViewport) debug("NOTE: keepOutsideViewport is only supported with canvg exporter.");
+
+		switch (type) {
+			case "image/svg+xml":
+				return exportSVG();
+			case "image/png":
+			case "image/jpeg":
+				if (!options.renderer) {
+					if (window.canvg) options.renderer = "canvg";
+					else options.renderer="native";
+				}
+				switch (options.renderer) {
+					case "canvg":
+						debug("using canvg renderer for " + type + " image export");
+						return exportImageCanvg(type);
+					case "native":
+						debug("using native renderer for " + type + " export. THIS MIGHT FAIL.");
+						return exportImage(type);
+					default:
+						debug("unknown image renderer given, doing noting (" + options.renderer + ")");
+				}
+				break;
+			default:
+				debug("Sorry! Exporting as '" + type + "' is not supported!");
+		}
+		return null;
+	}
+}
 
 class SVGRenderer extends Renderer {
 	render() {
 		let result = super.render();
 		if (result) {
 			let root = this.graph.currentRoot;
-			let buf = new StringBuffer('<svg width="100%" height="100%">');
-			buf.append(this.renderDefs());
+			let buf = new StringBuffer('<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">');
 			let t = this.translate;
 			buf.append('<g transform="translate(').append(t[0]).append(',').append(t[1]).append(')scale(').append(this.scale).append(')">');
+			buf.append(this.renderDefs());
 			buf.append(root.render(this));
 			buf.append('</g></svg>');
-			SVGRenderer.setContent(this.box, buf.toString());
+			this.box.innerHTML = buf.toString();
 			this.svg = this.box.firstElementChild;
 		}
 	}
@@ -38,20 +210,16 @@ class SVGRenderer extends Renderer {
 		g.setAttribute('transform', 'translate(' + t[0] + ',' + t[1] + ')scale(' + this.scale + ')');
 	}
 
-	toDataURL(format, options) {
-		SVGRenderer.toDataURL(this.svg, format, options);
-	}
-
 	static renderMarkers(markers) {
 		let buf = new StringBuffer(), str1, str2;
-		for (let marker of markers) {
+		markers.forEach(function(marker) {
 			str1 = this.TEMPLATES['Marker'](marker);
 			str2 = marker.shape;
 			if (!_.isString(str2))
 				str2 = this.renderShape(str2);
 			str1 = str1.replace(/\#\{shape\}/, str2);
 			buf.append(str1);
-		}
+		}, this);
 		return buf.toString();
 	}
 
@@ -126,17 +294,6 @@ class SVGRenderer extends Renderer {
 		return buf.toString();
 	}
 
-	static toDataURL(svg, format, options) {
-		if (!canvg) return null;
-		var bbox = svg.getBBox();
-		var canvas = DomUtils.createElement('canvas');
-		document.body.appendChild(canvas);
-		canvg(canvas, '<svg style="width: ' + bbox.width + 'px; height: ' + bbox.height + 'px;"><g transform="translate(' + bbox.width / 2 + ',' + bbox.height / 2 + ')scale(' + this.transform.scale  + ')">' + $(this.g.node()).prop('innerHTML') + '</g></svg>');
-		var image = canvas.toDataURL(format);
-		document.body.removeChild(canvas);
-		return image;
-	}
-
 	static appendContent(el, content) {
 		let buf = new StringBuffer();
 		buf.append('<svg>').append(content).append('</svg');
@@ -147,16 +304,23 @@ class SVGRenderer extends Renderer {
 		return el;
 	}
 
-	static setContent(el, content) {
-		if (DomUtils.isIE) {
-			// empty el first.
-			let child;
-			while (child = el.lastChild)
-				el.removeChild(child);
-			SVGRenderer.appendContent(el, content);
-		} else
-			el.innerHTML = content;
-		return el;
+	static transform(transform) {
+		let translate = [0, 0], scale = 1.0;
+		//
+		let parts = transform.match(/translate\(\s*([^)]+)/);
+		if (parts) {
+			let m = parts[1].trim().match(/([\d.-]+)[ ,]([\d.-]+)/);
+			if (m) {
+				translate[0] = parseFloat(m[1]) || 0;
+				translate[1] = parseFloat(m[2]) || 0;
+			} else
+				translate[0] = translate[1] = parseFloat(parts[1]);
+		}
+		parts = transform.match(/scale\(\s*([^)]+)/);
+		if (parts)
+			scale = parseFloat(parts[1]) || 1.0;
+
+		return {translate, scale};
 	}
 }
 SVGRenderer.TEMPLATES = {
@@ -176,8 +340,9 @@ SVGRenderer.TEMPLATES = {
 	},
 	Polygon: function(shape) {
 		let buf = new StringBuffer('<polygon points="');
-		for (let pt of shape.points)
+		shape.points.forEach(function(pt){
 			buf.append(pt[0]).append(',').append(pt[1]).append(' ');
+		});
 		buf.removeLast();
 		buf.append('"/>');
 		return buf.toString();

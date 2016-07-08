@@ -137,6 +137,53 @@ export default {
 		return null;
 	},
 
+	downloadImage: function(name, image) {
+		if (!image) return;
+		let mime = image.match(/^data:([^;]*)/)[1];
+		let type = mime.split('/')[1];
+		if (type.indexOf('+') > 0) type = type.split('+')[0];
+		if (this.isIE) {
+			image = this.b64toBlob(image.replace('data:' + mime + ';base64,', ''), mime);
+			navigator.msSaveBlob(image, name + '.' + type);
+		} else {
+			let link = this.createElement('a', {href: image, download: name + '.' + type}, {display: "none"});
+			document.body.appendChild(link);
+			link.click();
+			link.parentNode.removeChild(link);
+		}
+	},
+
+	/**
+	 * Convert b54 to blob. IE only
+	 */
+	b64toBlob: function (b64Data, contentType, sliceSize) {
+		contentType = contentType || '';
+		sliceSize = sliceSize || 512;
+
+		var byteCharacters = atob(b64Data);
+		var byteArrays = [];
+
+		for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+			var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+			var byteNumbers = new Array(slice.length);
+			for (var i = 0; i < slice.length; i++) {
+				byteNumbers[i] = slice.charCodeAt(i);
+			}
+			var byteArray = new Uint8Array(byteNumbers);
+			byteArrays.push(byteArray);
+		}
+		return new Blob(byteArrays, {type: contentType});
+	},
+
+	openImage: function(name, image) {
+		var myWindow = window.open("", "_blank", "toolbar=yes, scrollbars=yes, resizable=yes, width=500, height=500");
+		var myDocument = myWindow.document;
+		var img = myDocument.createElement("img");
+		this.setElement(img, {src: image, name: name});
+		myDocument.body.appendChild(img);
+	},
+
 	/**
 	 * Check whether the key event is from input, textarea or select.
 	 * @param e  input event

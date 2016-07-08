@@ -8,7 +8,7 @@ let _debugging = [], _debugAll = false, typeRegistry = {}, splice = Array.splice
  * Utility functions
  */
 export default {
-	type: function(namespace, name, type) {
+	type: function (namespace, name, type) {
 		if (!typeRegistry[namespace])
 			typeRegistry[namespace] = new Map();
 		if (!name)
@@ -18,7 +18,7 @@ export default {
 		typeRegistry[namespace].set(name, type);
 	},
 
-	createType: function(namespace, props, defaultType) {
+	createType: function (namespace, props, defaultType) {
 		let name = props.name;
 
 		// first check if type exists
@@ -28,7 +28,8 @@ export default {
 			if (!extend && defaultType)
 				extend = defaultType;
 			if (extend)
-				type = class extends extend {};
+				type = class extends extend {
+				};
 			else {
 				type = class {
 					constructor(config) {
@@ -46,7 +47,7 @@ export default {
 		return type;
 	},
 
-	buildTypes: function(types, namespace, defaultType) {
+	buildTypes: function (types, namespace, defaultType) {
 		this.log('Utils', 'Utils.buildTypes - ' + namespace);
 
 		if (!types && defaultType) {
@@ -72,13 +73,15 @@ export default {
 	// Helper function to correctly set up the prototype chain, for subclasses.
 	// Similar to `goog.inherits`, but uses a hash of prototype properties and
 	// class properties to be extended.
-	extend: function(child, parent, protoProps, staticProps) {
+	extend: function (child, parent, protoProps, staticProps) {
 		// Add static properties to the constructor function, if supplied.
 		_.extend(child, parent, staticProps);
 
 		// Set the prototype chain to inherit from `parent`, without calling
 		// `parent`'s constructor function.
-		var Surrogate = function(){ this.constructor = child; };
+		var Surrogate = function () {
+			this.constructor = child;
+		};
 		Surrogate.prototype = parent.prototype;
 		child.prototype = new Surrogate;
 
@@ -92,7 +95,7 @@ export default {
 		return child;
 	},
 
-	initConfig: function(obj, config) {
+	initConfig: function (obj, config) {
 		let props = {}, c = obj.constructor, cArr = [c];
 		while (c) {
 			if (c.super) {
@@ -108,7 +111,7 @@ export default {
 				_.assign(props, c.DEFAULTS);
 		}
 		obj.props = _.assign(props, config);
-		c.prototype.prop = function(name, value) {
+		c.prototype.prop = function (name, value) {
 			if (!value)
 				return this.props[name];
 			this.props[name] = value;
@@ -120,7 +123,7 @@ export default {
 	 * @param {Object} jsClass
 	 * @param {Object} defaultClass
 	 */
-	getConstructor: function(jsClass, defaultClass) {
+	getConstructor: function (jsClass, defaultClass) {
 		if (!jsClass)
 			jsClass = defaultClass;
 
@@ -129,7 +132,7 @@ export default {
 		return jsClass;
 	},
 
-	debug: function(moduleName) {
+	debug: function (moduleName) {
 		if (moduleName) {
 			_debugging.push(moduleName);
 		} else {
@@ -137,18 +140,24 @@ export default {
 		}
 	},
 
-	log: function(name, message) {
-		if (!window.console) { return; }
+	log: function (name, message) {
+		if (!window.console) {
+			return;
+		}
 		var debug = _debugAll;
 		if (!_debugAll) {
 			debug = false;
-			for (var i = 0; i<_debugging.length; i++) {
-				if (_debugging[i]==name) debug = true;
+			for (var i = 0; i < _debugging.length; i++) {
+				if (_debugging[i] == name) debug = true;
 			}
 		}
-		if (!debug) { return; }
-		while (name.length<10) { name=name+' '; }
-		name = name.substring(0, 10)+" - ";
+		if (!debug) {
+			return;
+		}
+		while (name.length < 10) {
+			name = name + ' ';
+		}
+		name = name.substring(0, 10) + " - ";
 		console.info(name, message);
 	},
 
@@ -168,13 +177,13 @@ export default {
 	 * }
 	 * @returns {*[]}
 	 */
-	getRelativePosition: function(bounds, geometry) {
+	getRelativePosition: function (bounds, geometry) {
 		let x = Math.abs(geometry.x) <= 1 ? bounds.width * geometry.x : geometry.x;
 		let y = Math.abs(geometry.y) <= 1 ? bounds.height * geometry.y : geometry.y;
 		return this.offsetPosition([x, y], geometry);
 	},
 
-	offsetPosition: function(pos, geometry) {
+	offsetPosition: function (pos, geometry) {
 		return [pos[0] + geometry.width * geometry.anchorX + geometry.offsetX, pos[1] + geometry.height * geometry.anchorY + geometry.offsetY];
 	},
 
@@ -184,13 +193,13 @@ export default {
 	 * @param scale the current scale
 	 * @param o can be either a Point or a Rectangle or a Point array.
 	 */
-	unscale: function(t, scale, o) {
+	unscale: function (t, scale, o) {
 		if (o instanceof Rectangle)
-			return new Rectangle(o.x*scale+t[0], o.y*scale+t[1], o.width*scale, o.height*scale);
+			return new Rectangle(o.x * scale + t[0], o.y * scale + t[1], o.width * scale, o.height * scale);
 		else if (o instanceof Point)
-			return new Point(o.x*scale+t[0], o.y*scale+t[1]);
+			return new Point(o.x * scale + t[0], o.y * scale + t[1]);
 		else
-			return [o[0]*scale+t[0], o[1]*scale+t[1]];
+			return [o[0] * scale + t[0], o[1] * scale + t[1]];
 	},
 
 	/**
@@ -199,19 +208,19 @@ export default {
 	 * @param scale the current scale
 	 * @param o can be either a Point or a Rectangle or a Point array.
 	 */
-	scale: function(t, scale, o) {
+	scale: function (t, scale, o) {
 		if (o instanceof Rectangle)
-			return new Rectangle((o.x-t[0])/scale, (o.y-t[1])/scale, o.width/scale, o.height/scale);
+			return new Rectangle((o.x - t[0]) / scale, (o.y - t[1]) / scale, o.width / scale, o.height / scale);
 		else if (o instanceof Point)
-			return new Point((o.x-t[0])/scale, (o.y-t[1])/scale);
+			return new Point((o.x - t[0]) / scale, (o.y - t[1]) / scale);
 		else
-			return [(o[0]-t[0])/scale, (o[1]-t[1])/scale];
+			return [(o[0] - t[0]) / scale, (o[1] - t[1]) / scale];
 	},
 
 	/**
 	 * Convenience method.
 	 */
-	getProperty: function(obj, prop) {
+	getProperty: function (obj, prop) {
 		if (!obj)
 			return null;
 		if (_.has(obj, prop))

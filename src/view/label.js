@@ -234,16 +234,26 @@ export default (function() {
 	}
 
 	let editor = {
-		visible: function() { return this.input && this.input.style.visibility == 'visible'; },
-
-		start: function(key, container, box, refEl, textEl, scale = 1.0) {
-			if (!this.input) {
-				this.input = DomUtils.createElement('textarea', {id:"inlineEditor", unselectable:"off"}, {position:"absolute", overflow:"hidden", padding:"0px", margin:"0px", border:"transparent"});
-				container.appendChild(this.input);
-			} else if (this.visible() && this.key != key) {
-				// need to close the existing editor first
-				this.stop();
+		start: function(key, container, box, refEl, textEl, scale = 1.0, singleLine = true) {
+			if (this.input) {
+				if (this.key != key) {
+					// need to close the existing editor first
+					this.stop();
+				} else
+					return;
 			}
+			var tag = singleLine ? 'input' : 'textarea';
+			this.input = DomUtils.createElement(tag, {id:"inlineEditor", unselectable:"off"}, {position:"absolute", overflow:"hidden", padding:"0px", margin:"0px", border:"transparent"});
+			if (singleLine) {
+				Events.on(this.input, 'keydown keyup', (event) => {
+					if (event.keyCode == 13) {
+						Events.off(this.input, 'keydown keyup');
+						this.stop();
+					}
+				});
+			}
+			container.appendChild(this.input);
+
 			this.key = key;
 			this.box = box;
 			this.refEl = refEl;
@@ -276,17 +286,20 @@ export default (function() {
 		},
 
 		stop: function(cancel) {
-			if (!this.visible()) return;
+			if (!this.input) return;
 
 			cancel = cancel || false;
 			if (this.textEl)
 				this.textEl.style.visibility = null;
 
-			this.input.style.visibility = 'hidden';
 			if (!cancel)
 				Events.fire(this, 'editor.update', [this.key, this.input.value]);
 
 			Events.fire(this, 'editor.stop', [this.key]);
+
+			// remove the input
+			this.input.parentNode.removeChild(this.input);
+			delete this.input;
 			delete this.key;
 			delete this.box;
 			delete this.refEl;

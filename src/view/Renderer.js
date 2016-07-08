@@ -188,7 +188,8 @@ class Renderer {
 		if (preprocessor) {
 			var parts = t.match(/(#{[^#]*})/g);
 			var obj = {};
-			for (let part of parts) {
+			for (let part in parts) {
+				part = parts[part];
 				part = part.substring(2, part.length -1).trim();
 				obj[part] = preprocessor[_.camelCase('render ' + part)](this);
 			}
@@ -197,7 +198,6 @@ class Renderer {
 		return t;
 	}
 
-	toDataURL(format, options) {}
 	reset() {}
 
 	destroy() {
