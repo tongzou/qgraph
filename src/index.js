@@ -22,6 +22,7 @@ import Marker from "./view/Marker";
 import Renderer from "./view/Renderer";
 import SVGRenderer from "./view/SVGRenderer";
 import GraphBehavior from "./behavior/GraphBehavior";
+import SelectionBehavior from "./behavior/SelectionBehavior";
 
 Shape.addShape("Rectangle", Rectangle);
 Shape.addShape("Ellipse", Ellipse);
@@ -50,5 +51,6 @@ export default {
 	FlowLayout,
 	Renderer,
 	SVGRenderer,
-	GraphBehavior
+	GraphBehavior,
+	SelectionBehavior
 };

@@ -66,7 +66,7 @@ export default {
 			let type = _.remove(types, {name: defaultType.name});
 			type = type.length > 0 ? type[0] : null;
 			if (type)
-				defaultType = this.createType(namespace, _.assign({}, defaultType, type));
+				defaultType = this.createType(namespace, _.defaultsDeep(type, defaultType));
 			else
 				defaultType = this.createType(namespace, defaultType);
 		}

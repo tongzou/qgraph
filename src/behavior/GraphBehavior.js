@@ -13,8 +13,8 @@ class GraphBehavior extends Behavior {
 		let f = function(type, ns, graph, pos, event) {
 			//Cursor.updateCursor(type, ns, graph, event);
 		};
-		dispatcher.register('drag*.graph', this.handleDrag, this);
-		dispatcher.register('zoom.*', this.handleZoom, this);
+		dispatcher.register(/^drag.*\.graph$/, this.handleDrag, this);
+		dispatcher.register(/^zoom/, this.handleZoom, this);
 		//dispatcher.register(['mousedown.graph', 'mouseenter.graph', 'mouseleave.graph'], f);
 		this.offset = null;
 	}

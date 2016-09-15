@@ -1,6 +1,7 @@
 import _ from "lodash";
 import Events from "bean";
 import * as KeyUtils from "./KeyUtils";
+import Utils from "../util/Utils";
 import DomUtils from "../util/DomUtils";
 import StringBuffer from "./../util/StringBuffer";
 
@@ -13,6 +14,7 @@ export default class EventDispatcher {
 	 * Constructor
 	 * @param root the root element that the manager will listen to.
 	 * @param zoomScale
+	 * @param config the configuraton for the event dispatcher.
 	 */
 	constructor(root, zoomScale = [0, Infinity], config = {}) {
 		this.root = root;
@@ -223,7 +225,7 @@ export default class EventDispatcher {
 		if (!this.started) return;
 		const nsType = ns ? type + '.' + ns : type;
 		_.forEach(this.listeners, (listeners, key) => {
-			if (EventDispatcher.match(nsType, key)) {
+			if (EventDispatcher.match(nsType, listeners.regexp ? listeners.regexp : key)) {
 				_.forEach(listeners, (listener) => {
 					if (!listener.context)
 						listener.callback.apply(window, [type, ns, data, pos, event]);
@@ -298,11 +300,20 @@ export default class EventDispatcher {
 			return;
 		}
 		const listener = {callback: callback, context: context, zIndex: zIndex};
+		var regexp = null;
+		if (type instanceof RegExp) {
+			regexp = type;
+			type = type + '';
+		}
 		this.listeners[type] || (this.listeners[type] = []);
+		if (regexp && !this.listeners[type].regexp)
+			this.listeners[type].regexp = regexp;
 		this.listeners[type].push(listener);
 	}
 
 	unregister(type, callback, context) {
+		if (type instanceof RegExp)
+			type = type + '';
 		let listeners = this.listeners[type], listener;
 		if (!listeners) return;
 		for (let i = 0; i < listeners.length; i++) {
@@ -325,7 +336,11 @@ export default class EventDispatcher {
 	 * Check if the registered event type matches the real event type. "*" is allowed as a wild card.
 	 */
 	static match(nsType, registeredType) {
-		const arr = registeredType.split('*');
+		if (registeredType instanceof RegExp)
+			return nsType.match(registeredType);
+
+		return nsType == registeredType;
+		/*const arr = registeredType.split('*');
 		if (arr.length == 1)
 			return nsType == registeredType;
 
@@ -338,7 +353,7 @@ export default class EventDispatcher {
 				return false;
 			index += arr[i].length;
 		}
-		return true;
+		return true;*/
 	}
 
 	static mouse(container, e) {

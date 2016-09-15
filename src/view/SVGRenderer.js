@@ -118,6 +118,12 @@ if (typeof (SVGElement) != "undefined") {
 			if (!canvg) return null;
 			let canvas = DomUtils.createElement('canvas', null, {display: "none"});
 			document.body.appendChild(canvas);
+			if (type == 'javascript') {
+				var xcanvas = new jsCanvas ('jscanvastest');
+				xcanvas.canvas.style.display = 'none';
+				//xcanvas.canvas = canvas;
+			}
+
 			if (!options.keepOutsideViewport) {
 				canvg(canvas, _svg.outerHTML);
 			} else {
@@ -137,7 +143,13 @@ if (typeof (SVGElement) != "undefined") {
 				buf.append('<svg width="').append(bbox.width + 2*padding).append('px" height="').append(bbox.height + 2*padding).append('px"><g transform="translate(')
 					.append(-bbox.x+translate[0]+padding).append(',').append(-bbox.y+translate[1]+padding).append(')scale(').append(scale).append(')">')
 					.append(_svg.firstElementChild.innerHTML).append('</g></svg>');
-				canvg(canvas, buf.toString());
+				if (type == 'javascript') {
+					xcanvas.compile(buf.toString(), function () {
+						if (options.callback) options.callback(xcanvas.toString());
+					});
+					return;
+				} else
+					canvg(canvas, buf.toString());
 			}
 			var image_dataurl = canvas.toDataURL(type);
 			if (options.callback) options.callback( image_dataurl );
@@ -155,6 +167,7 @@ if (typeof (SVGElement) != "undefined") {
 				return exportSVG();
 			case "image/png":
 			case "image/jpeg":
+			case "javascript":
 				if (!options.renderer) {
 					if (window.canvg) options.renderer = "canvg";
 					else options.renderer="native";
@@ -234,7 +247,7 @@ class SVGRenderer extends Renderer {
 		return template(shape);
 	}
 
-	static renderLink(shape) {
+	static getPathData(shape) {
 		let points = shape.points;
 		let controlPts = shape.controlPts;
 		if (!points || points.length == 0) return '';
@@ -276,8 +289,12 @@ class SVGRenderer extends Renderer {
 					buf.append(' L ').append(point);
 			}
 		}
-		let d = buf.toString();
-		buf.clear();
+		return buf.toString();
+	}
+
+	static renderLink(shape) {
+		let buf = new StringBuffer();
+		let d = SVGRenderer.getPathData(shape);
 		if (shape.showGauge)
 			buf.append('<path style="stroke: white; stroke-width: 9; visibility: hidden; pointer-events: stroke;" d="')
 				.append(d).append('"/>');
@@ -325,8 +342,8 @@ class SVGRenderer extends Renderer {
 }
 SVGRenderer.TEMPLATES = {
 	$root: '<g id="${id}" class="${className}">#{children}</g>',
-	$node: '<g id="${id}" class="${className}" ns="${namespace}" transform="translate(${x},${y})">#{shape}#{label}</g>',
-	$edge: '<g id="${id}" class="${className}" ns="${namespace}">#{shape}#{label}</g>',
+	$node: '<g id="${id}" class="${className}" style="${style}" ns="${namespace}" transform="translate(${x},${y})">#{shape}#{label}</g>',
+	$edge: '<g id="${id}" class="${className}" style="${style}" ns="${namespace}">#{shape}#{label}</g>',
 	Ellipse: '<ellipse cx="0" cy="0" rx="${width/2}" ry="${height/2}"/>',
 	Rectangle: '<rect x="${-width/2}" y="${-height/2}" width="${width}" height="${height}" rx="9" ry="9"/>',
 	Triangle: '<polygon points="${-width/2},${-height/2} ${width/2},${-height/2} 0,${height/2}"/>',

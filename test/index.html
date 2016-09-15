@@ -5,22 +5,38 @@
 	<title>qgraph Test</title>
 	<script src="../node_modules/lodash/lodash.js"></script>
 	<script src="../lib/canvg.js"></script>
+	<script src="../lib/jscanvas.js"></script>
 	<script src="../dist/qgraph.js"></script>
 	<link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 <body>
+<canvas id="ycanvas"></canvas>
 <input type="button" value="Performance Test" onclick="testPerformance()">
 <input type="button" value="Toggle Zoom" onclick="toggleZoom()">
 <input type="button" value="Test Image Capture" onclick="testImageCapture()">
 <input type="button" value="Start Viewer" onclick="startViewer()"/>
 <input type="button" value="Destroy Viewer" onclick="destroyViewer()"/>
-<div id="graph-demo" style="position:absolute;left:10px;right:10px;top:10px;bottom:10px;margin-top:20px"></div>
+<div id="graph-demo" style="position:absolute;left:10px;right:10px;top:150px;bottom:10px;margin-top:20px"></div>
 <script type="text/javascript">
 var qg = window["qgraph"].default;
 var graphConfig = {
 	mode: 0,
 	edgeTypes: [
-		{name: 'Default', shape: { type: 'manhattan', round: 0, orthogonal: true}, labelConfig: { align: 'center', backgroundStyle: 'fill:white;stroke-width:0', geometry: {x: 0.5}}}
+		{
+			name: 'Default',
+			style: "fill: none;stroke: rgb(134, 142, 142);stroke-width: 1;stroke-miterlimit: 10;",
+			shape: {
+				type: 'direct', round: 10, orthogonal: true
+			},
+			labelConfig: {
+				align: 'center',
+				backgroundStyle: 'fill:white;stroke-width:0',
+				geometry: {x: 0.5}
+			},
+			endMarker: {
+				size: 15
+			}
+		}
 	],
     nodeTypes: [
 		{name: "Error"},
@@ -76,15 +92,14 @@ var viewConfig = {
 var model = {
     nodes: [
 	    {type:'Assignment', label:'simpleFlow1', id:'1', x:100, y:100},
-	    {type:'Assignment', label:'[Utility]', id:'2', x:100, y:250},
+	    {type:'Assignment', label:'[Utility]', id:'2', x:120, y:250}/*,
 	    {type:'Start', label:'', id:'3', x:300, y:500},
-	    {type:'End', label:'', id:'4', x:500, y:60}
+	    {type:'End', label:'', id:'4', x:500, y:60}*/
     ],
 	edges: [
-		{from: '1', to:'2', label:'edge'}
+		{from: '1', to:'2'}
 	]
 };
-
 
 qg.Utils.debug();
 var graph, renderer;
@@ -141,9 +156,54 @@ function testUpdate() {
     ViewerManager.getViewer().update(model);
 }
 
+function drawCapturedImage() {
+	var ycanvas = document.getElementById ('ycanvas');
+	var yctx = ycanvas.getContext('2d');
+	var cantest = new jscanvastest (yctx);
+	// we can get the natural size of the object from the instantiated
+	// object this way.
+	// alternatively, you can use inwidth/inheight to scale the output
+	// object to a given canvas size, eg:
+	//   yctx.scale (200/cantest.inwidth, 200/cantest.inwidth);
+	ycanvas.width = cantest.inwidth;
+	ycanvas.height = cantest.inheight;
+	yctx.scale (1,1);
+	// capture the sets to various fields in the 2d context
+	// this is good for changing the look of the generated object at run time.
+	// @override
+	cantest.setter = function (ctx, key, val) {
+		if (key == 'fillStyle') {
+			switch (val) {
+				case '#bbbbbb':
+					val = 'rgba(255, 0, 0, 1)';
+					break;
+				case '#aaaaaa':
+					val = ctx.createLinearGradient(0,0,0,500);
+					val.addColorStop (0, 'rgb(255,0,0)');
+					val.addColorStop (1, 'rgb(0,255,0)');
+					break;
+				case '#eeeeee':
+					val = ctx.createPattern(document.getElementById('pattern'), 'repeat');
+					break;
+				default:
+					break;	// keep original
+			}
+		} else if (key == 'strokeStyle' && val == 'rgba(0, 0, 0, 1)')
+			val = 'rgba(0, 0, 255, 1)';
+		ctx [key] = val;
+	};
+	// all set up, render away...
+	cantest.render ();
+}
+
 function testImageCapture() {
-	var image = renderer.svg.toDataURL('image/png', { keepOutsideViewport: true, debug: true, padding: 20});
-	qg.DomUtils.downloadImage('graph', image);
+	//drawCapturedImage();
+	var image = renderer.svg.toDataURL('javascript', { keepOutsideViewport: true, debug: true, padding: 20, callback: function(data) {
+		console.log(data);
+		eval(data);
+		drawCapturedImage();
+	}});
+	//qg.DomUtils.downloadImage('graph', image);
 }
 
 

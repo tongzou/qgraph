@@ -76,6 +76,7 @@ export default class Cell {
 			id: this.id,
 			key: key,
 			className: this.computedClassName,
+			style: this.viewProp(key, 'style'),
 			namespace: this.namespace
 		}, shape);
 	}

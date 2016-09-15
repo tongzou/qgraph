@@ -6,6 +6,7 @@ import Layout from "../layout/Layout";
 import Rectangle from "../geometry/Rectangle";
 import EventDispatcher from "../event/EventDispatcher";
 import GraphBehavior from "../behavior/GraphBehavior";
+import SelectionBehavior from "../behavior/SelectionBehavior";
 import Label from "./Label";
 
 class Renderer {
@@ -124,36 +125,10 @@ class Renderer {
 
 	render() {
 		if (!this._graph) return false;
-		// intialize views
 		if (this.layout)
 			this.layout.layout(this._graph.currentRoot, this.viewport());
 
-		// create the event dispatcher if necessary.
-		if (!this.dispatcher) {
-			this.dispatcher = new EventDispatcher(this.box, [this.prop('minZoom'), this.prop('maxZoom')]);
-			let jsClass;
-			if (this.prop('graphBehavior')) {
-				jsClass = Utils.getConstructor(this.prop('graphBehavior'));
-				this.graphBehavior = new jsClass(this);
-			}
-			this.dispatcher.register('mouseup.node.label', function(type, ns, target, pos, event) {
-				let node = this._graph.nodes[target.getAttribute('id')];
-				if (!this.dispatcher.dragging && !node._firstSelection) {
-					Label._delayEdit = _.delay(() => {
-						if (Label._delayEdit) {
-							delete Label._delayEdit;
-							Label.editor.start(node.id, this.box, node.getLabelBox(this.id), target, event.nsTarget, this.scale);
-						}
-					}, 250);
-				}
-			}, this);
-			this.dispatcher.register(['mousedown.*', 'zoom*'], function(type, ns, target, pos, event) {
-				if (!DomUtils.eventFromInput(event)) {
-					Label.editor.stop();
-				}
-			}, this);
-		}
-		this.dispatcher.start();
+		this.initializeBehaviors();
 		return true;
 	}
 
@@ -167,6 +142,39 @@ class Renderer {
 
 	renderMarkers(markers) {
 		return this.constructor.renderMarkers(markers);
+	}
+
+	initializeBehaviors() {
+		// create the event dispatcher if necessary.
+		if (!this.dispatcher) {
+			this.dispatcher = new EventDispatcher(this.box, [this.prop('minZoom'), this.prop('maxZoom')]);
+			let jsClass;
+			if (this.prop('graphBehavior')) {
+				jsClass = Utils.getConstructor(this.prop('graphBehavior'));
+				this.graphBehavior = new jsClass(this);
+			}
+			if (this.prop('selectionBehavior')) {
+				jsClass = Utils.getConstructor(this.prop('selectionBehavior'));
+				this.selectionBehavior = new jsClass(this);
+			}
+			/*this.dispatcher.register('mouseup.node.label', function(type, ns, target, pos, event) {
+				let node = this._graph.nodes[target.getAttribute('id')];
+				if (!this.dispatcher.dragging && !node._firstSelection) {
+					Label._delayEdit = _.delay(() => {
+						if (Label._delayEdit) {
+							delete Label._delayEdit;
+							Label.editor.start(node.id, this.box, node.getLabelBox(this.id), target, event.nsTarget, this.scale);
+						}
+					}, 250);
+				}
+			}, this);
+			this.dispatcher.register([/^mousedown/, /^zoom/], function(type, ns, target, pos, event) {
+				if (!DomUtils.eventFromInput(event)) {
+					Label.editor.stop();
+				}
+			}, this);*/
+		}
+		this.dispatcher.start();
 	}
 
 	refresh() {}
@@ -222,7 +230,8 @@ Renderer.DEFAULTS = {
 	minZoom: 0.2,
 	zoomFactor: 1.2,
 	maskOpacity: 0.5,
-	graphBehavior: GraphBehavior
+	graphBehavior: GraphBehavior,
+	selectionBehavior: SelectionBehavior
 };
 
 export default Renderer;

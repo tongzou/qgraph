@@ -13,7 +13,7 @@ class EdgeBehavior extends Behavior {
 			this.showHandles(_.filter(selected, function(cell) { return cell instanceof Edge}));
 		}, this);*/
 
-		this.renderer.dispatcher.register('drag*.edgehandle', this.handleDrag, this);
+		this.renderer.dispatcher.register(/^drag.*\.edgehandle$/, this.handleDrag, this);
 	}
 
 	handleDrag(type, ns, data, pos, event) {
