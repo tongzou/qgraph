@@ -388,6 +388,13 @@ markerUnits="userSpaceOnUse" ${marker.fill ? `style="stroke: ${marker.fill};fill
    if (box) {%>
 	<g <% if (box.config && box.config.class) {%>class="<%=box.config.class%>"<%}%>\
 		<% if (box.config && box.config.ns) {%>ns="<%=box.config.ns%>"<%}%>\
+		<% if (box.config && box.config.inlineStyle) {%>\
+			font-size="<%=box.config.fontSize%>"\
+			font-family="<%=box.config.fontFamily%>"\
+			font-weight="<% if (box.bold) {%>bold<%} else {%>normal<%}%>"\
+			<% if (box.underline) {%>text-decoration="underline"<%}%>\
+			<% if (box.italic) {%>font-style="italic"<%}%>\
+		<%}%>\
 		text-anchor="<%=box.anchor%>"\
 		transform="translate(<%=box.bounds.x%>,<%=box.bounds.y%>)<% if (box.config && box.config.rotation) {%>rotate(<%=box.config.rotation%> <%=box.pivot[0]%> <%=box.pivot[1]%>)<%}%>">
 	<% if (box.config.backgroundStyle) {%>
@@ -401,7 +408,7 @@ markerUnits="userSpaceOnUse" ${marker.fill ? `style="stroke: ${marker.fill};fill
 		<%}%>
 	</g>
 <%}%>
-`.trim(), {variable: "data"})
+`.trim(), {variable: "data"})   //TODO add more inline text styles.
 };
 
 export default SVGRenderer;

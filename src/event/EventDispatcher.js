@@ -59,6 +59,18 @@ export default class EventDispatcher {
 		Events.off(document, 'keydown keyup', this.handler);
 	}
 
+	zoomIn() {
+		this.scale *= 1.25;
+		this.scale = Math.max(Math.min(this.zoomScale[1], this.scale), this.zoomScale[0]);
+		return this.scale;
+	}
+
+	zoomOut() {
+		this.scale *= 0.8;
+		this.scale = Math.max(Math.min(this.zoomScale[1], this.scale), this.zoomScale[0]);
+		return this.scale;
+	}
+
 	getEventInfo(event) {
 		let target = event.target;
 		let buf = new StringBuffer(), ns, stack = [], isRoot = false;

@@ -11,6 +11,7 @@ let defaultConfig = {
 	fontSize: 11,
 	fontFamily: "Arial",
 	fontStyle: 0,
+	fontColor: 'black',
 	padding: 0,
 	linePadding: 0,
 	align: "left",
@@ -224,6 +225,7 @@ export default (function() {
 		let maxBounds = new Rectangle(pos[0], pos[1], geometry.width, geometry.height);
 		return {
 			config: labelConfig, label: wrappedLabel, _label: label,
+			bold, underline: fontStyle & FONT_UNDERLINE, italic: fontStyle & FONT_ITALIC, shadow: fontStyle & FONT_SHADOW,
 			dx, dy: -geometry.height/2 + padding + wrappedLabel.lineHeight - wrappedLabel.baseline, anchor, lineHeight: wrappedLabel.lineHeight + linePadding,
 			pivot, bounds, maxBounds
 		};
