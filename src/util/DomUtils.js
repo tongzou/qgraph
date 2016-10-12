@@ -16,6 +16,8 @@ export default {
 		// If IE 11 then look for Updated user agent string.
 		else if (!!navigator.userAgent.match(/Trident\/7\./))
 			return 11;
+		else if (!!navigator.userAgent.match(/Edge\//))
+			return "Edge";
 		else
 			return false;
 	})(),
@@ -23,6 +25,12 @@ export default {
 	isFireFox : (function(){
 		// InstallTrigger: Firefox's API to install add-ons
 		return typeof InstallTrigger !== 'undefined';
+	})(),
+
+	isChrome: (function() {
+		if (!window || !window.navigator || !navigator || navigator.userAgent.indexOf('Edge') >= 0) return false;
+		var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+		return raw ? parseInt(raw[2], 10) : false;
 	})(),
 
 	createElement: function (tag, attribs, styles, html) {
