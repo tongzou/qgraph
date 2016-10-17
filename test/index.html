@@ -197,13 +197,13 @@ function drawCapturedImage() {
 }
 
 function testImageCapture() {
-	//drawCapturedImage();
-	var image = renderer.svg.toDataURL('javascript', { keepOutsideViewport: true, debug: true, padding: 20, callback: function(data) {
+	/*var image = renderer.svg.toDataURL('javascript', { keepOutsideViewport: true, debug: true, padding: 20, callback: function(data) {
 		console.log(data);
 		eval(data);
 		drawCapturedImage();
-	}});
-	//qg.DomUtils.downloadImage('graph', image);
+	}});*/
+	var image = renderer.svg.toDataURL('image/png', { keepOutsideViewport: true, debug: true, padding: 20});
+	qg.DomUtils.downloadFile('graph', image);
 }
 
 

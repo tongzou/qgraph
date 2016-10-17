@@ -145,16 +145,29 @@ export default {
 		return null;
 	},
 
-	downloadImage: function(name, image) {
-		if (!image) return;
-		let mime = image.match(/^data:([^;]*)/)[1];
-		let type = mime.split('/')[1];
-		if (type.indexOf('+') > 0) type = type.split('+')[0];
+	downloadFile: function(name, data) {
+		if (!data) return;
+		let mime = data.match(/^data:([^;,]*)/)[1];
+		if (name.indexOf('.') < 0) {
+			if (!mime) mime = 'text/plain';
+			if (mime == 'text/plain')
+				name = name + '.txt';
+			else {
+				let type = mime.split('/')[1];
+				if (type.indexOf('+') > 0) type = type.split('+')[0];
+				name = name + '.' + type;
+			}
+		}
 		if (this.isIE) {
-			image = this.b64toBlob(image.replace('data:' + mime + ';base64,', ''), mime);
-			navigator.msSaveBlob(image, name + '.' + type);
+			let encoded = data.indexOf(';base64') >= 0;
+			if (encoded)
+				data = atob(data.replace('data:' + mime + ';base64,', ''));
+			else
+				data = decodeURI(data.replace('data:' + mime + ',', ''));
+			data = this.GetBlob(data, mime);
+			navigator.msSaveBlob(data, name);
 		} else {
-			let link = this.createElement('a', {href: image, download: name + '.' + type}, {display: "none"});
+			let link = this.createElement('a', {href: data, download: name}, {display: "none"});
 			document.body.appendChild(link);
 			link.click();
 			link.parentNode.removeChild(link);
@@ -164,15 +177,14 @@ export default {
 	/**
 	 * Convert b54 to blob. IE only
 	 */
-	b64toBlob: function (b64Data, contentType, sliceSize) {
+	GetBlob: function (data, contentType, sliceSize) {
 		contentType = contentType || '';
 		sliceSize = sliceSize || 512;
 
-		var byteCharacters = atob(b64Data);
 		var byteArrays = [];
 
-		for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-			var slice = byteCharacters.slice(offset, offset + sliceSize);
+		for (var offset = 0; offset < data.length; offset += sliceSize) {
+			var slice = data.slice(offset, offset + sliceSize);
 
 			var byteNumbers = new Array(slice.length);
 			for (var i = 0; i < slice.length; i++) {
