@@ -33,6 +33,21 @@ export default {
 		return raw ? parseInt(raw[2], 10) : false;
 	})(),
 
+	isMac: (function() {
+		if (!window || !window.navigator || !navigator) return false;
+		return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+	})(),
+
+	isWindows: (function() {
+		if (!window || !window.navigator || !navigator) return false;
+		return navigator.appVersion.indexOf("Windows") >= 0;
+	})(),
+
+	isLinux: (function() {
+		if (!window || !window.navigator || !navigator) return false;
+		return navigator.appVersion.indexOf("Linux") >= 0;
+	})(),
+
 	createElement: function (tag, attribs, styles, html) {
 		let el = document.createElement(tag);
 		this.setElement(el, attribs, styles);
