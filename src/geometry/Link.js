@@ -203,15 +203,14 @@ class Manhattan extends Link {
 		shapeConfig = _.defaults(shapeConfig, {
 			MIN_BUFFER: 10,
 			autoRoute: false,
+			randomNoise: 0,
 			maxChannelWidth: 100
 		});
 		super(terminalVisual, shapeConfig, startMarker, endMarker);
 	}
 
 	get points() {
-		//let pos = Manhattan.routeInternal(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
-		//pos = Manhattan.processPositions(this.start, this.end, pos, this.startNormal.x!=0);
-		let pos = Manhattan.findPositions(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
+		let pos = Manhattan.route(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
 		if (this.autoRoute) {
 			this._mergeSegments(pos);
 			var boxes = [], node, startBox, endBox;
@@ -232,12 +231,15 @@ class Manhattan extends Link {
 			if (boxes.length > 1)
 				this.autoRoute(pos, container.getBounds(document), boxes, startBox, endBox);
 		}
-		this._mergeSegments(pos);
+		Manhattan._mergeSegments(pos);
+		if (this.randomNoise) {
+
+		}
 		return pos;
 	}
 
 	//New function for finding route
-	static findPositions(start, end, startNormal, endNormal, buffer) {
+	static route(start, end, startNormal, endNormal, buffer) {
 		var startBuffer = new Point(start.x + startNormal.x * buffer, start.y + startNormal.y * buffer);
 		var endBuffer = new Point(end.x + endNormal.x * buffer, end.y + endNormal.y * buffer);
 		var startBufferNormal, endBufferNormal;
@@ -301,102 +303,6 @@ class Manhattan extends Link {
 		}
 		prunePts.push(pts[pts.length - 1]);
 		return prunePts;
-	}
-
-	/**
-	 * Make a route based on the start, end and startNormal and endNormal
-	 * None of the parameters can be null
-	 * TODO: This method could use some improvement...
-	 */
-	static routeInternal(start, end, startNormal, endNormal, buffer) {
-		var direction = start.getDirection(end);
-		var average = start.getMidPoint(end);
-		var pos = [];
-		var startPositive = new Point(startNormal.x*startNormal.x, startNormal.y*startNormal.y);
-		var endPositive = new Point(endNormal.x*endNormal.x, endNormal.y*endNormal.y);
-		var horizontal = startNormal.x != 0;
-		pos[0] = horizontal ? start.y : start.x;
-
-		horizontal = !horizontal;
-		var i;
-		if (startNormal.dotProduct(endNormal) == 0) {
-			if ((startNormal.dotProduct(direction) >= 0)
-				&& (endNormal.dotProduct(direction) <= 0)) {
-				// 0
-			} else {
-				// 2
-				if (startNormal.dotProduct(direction) < 0)
-					i = startPositive.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
-				else
-					i = horizontal ? average.y : average.x;
-
-				pos.push(i);
-				horizontal = !horizontal;
-
-				if (endNormal.dotProduct(direction) > 0)
-					i = endPositive.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
-				else
-					i = horizontal ? average.y : average.x;
-
-				pos.push(i);
-				horizontal = !horizontal;
-			}
-		} else {
-			if (startNormal.dotProduct(endNormal) > 0) {
-				//1
-				if (startNormal.dotProduct(direction) >= 0)
-					i = startPositive.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
-				else
-					i = endPositive.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
-				pos.push(i);
-				horizontal = !horizontal;
-			} else {
-				//3 or 1
-				if (startNormal.dotProduct(direction) < 0) {
-					i = startPositive.dotProduct(start.getTranslated(startNormal.getScaled(buffer)));
-					pos.push(i);
-					horizontal = !horizontal;
-				}
-
-				i = horizontal ? average.y : average.x;
-				pos.push(i);
-				horizontal = !horizontal;
-
-				if (startNormal.dotProduct(direction) < 0) {
-					i = endPositive.dotProduct(end.getTranslated(endNormal.getScaled(buffer)));
-					pos.push(i);
-					horizontal = !horizontal;
-				}
-			}
-		}
-		pos.push(horizontal ? end.y : end.x);
-
-		return pos;
-	}
-
-	// Process the positions.
-	static processPositions(start, end, positions, horizontal) {
-		var pos = [];
-		pos[0] = horizontal ? start.x : start.y;
-		var i;
-		for (i = 0; i < positions.length; i++) {
-			pos[i + 1] = positions[i];
-		}
-		pos.push((horizontal == (positions.length % 2 == 1)) ? end.x : end.y);
-
-		var pts = [];
-		pts[0] = start;
-		var p;
-		var current, prev;
-		for (i = 2; i < pos.length - 1; i++) {
-			horizontal = !horizontal;
-			prev = pos[i - 1];
-			current = pos[i];
-			p = horizontal ? new Point(prev, current) : new Point(current, prev);
-			pts.push(p);
-		}
-		pts.push(end);
-		return pts;
 	}
 
 	/**
@@ -492,7 +398,7 @@ class Manhattan extends Link {
 		}
 	}
 
-	_hasIntersection(pts, boxes) {
+	static _hasIntersection(pts, boxes) {
 		for (var i = 0; i < pts.length - 1; i++) {
 			for (var j = 0; j < boxes.length; j++) {
 				if (boxes[j].detectIntersection(pts[i], pts[i+1]) >= 0)
@@ -502,7 +408,7 @@ class Manhattan extends Link {
 		return false;
 	}
 
-	_getFirstIntersection(pts, i, boxes, startBox, endBox) {
+	static _getFirstIntersection(pts, i, boxes, startBox, endBox) {
 		var box, side, savedIndex = null, savedSide = null;
 		for (var j = 0; j < boxes.length; j++) {
 			if ((i == 0 && j == startBox) || (i == pts.length - 2 && j == endBox))
@@ -553,7 +459,7 @@ class Manhattan extends Link {
 		return dir;
 	}
 
-	_getRouteDirection(pt1, pt2) {
+	static _getRouteDirection(pt1, pt2) {
 		if (pt1.x == pt2.x) {
 			if (pt1.y < pt2.y) return Point.S;
 			return Point.N;
@@ -771,7 +677,7 @@ class Manhattan extends Link {
 	/**
 	 * This method will merge the redundant segments.
 	 */
-	_mergeSegments(pts) {
+	static _mergeSegments(pts) {
 		var h1 = pts[pts.length-1].y == pts[pts.length-2].y;
 		var h2;
 		for (var i = pts.length - 2; i >= 1; i--) {
