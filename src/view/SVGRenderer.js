@@ -406,6 +406,9 @@ markerUnits="userSpaceOnUse" ${marker.fill ? `style="stroke: ${marker.fill};fill
 		<%});} else { %>
 			<text><%=box.label%></text>
 		<%}%>
+		<% if (box.config.title) {%>
+			<title><%=box.config.title%></title>
+		<%}%>
 	</g>
 <%}%>
 `.trim(), {variable: "data"})   //TODO add more inline text styles.
