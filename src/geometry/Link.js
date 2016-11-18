@@ -232,8 +232,11 @@ class Manhattan extends Link {
 				this.autoRoute(pos, container.getBounds(document), boxes, startBox, endBox);
 		}
 		Manhattan._mergeSegments(pos);
-		if (this.randomNoise) {
-
+		if (this.randomNoise && pos.length > 3) {
+			for (var i = 1; i < pos.length - 2; i++) {
+				var randomNumber = Math.floor(Math.random() * this.randomNoise * 2 - this.randomNoise);
+				this._moveSegment(pos, 1, randomNumber, 1, 1);
+			}
 		}
 		return pos;
 	}
@@ -638,7 +641,7 @@ class Manhattan extends Link {
 			l = Math.min(startPadding, pts[0].distance(pts[1])/2);
 			pt = pts[0].getTranslated(dir.scale(l));
 			pts.splice(1, 0, pt);
-			_moveSegment(pts, i+1, d);
+			this._moveSegment(pts, i+1, d);
 			return;
 		}
 		if (i == pts.length - 2) {
@@ -649,7 +652,7 @@ class Manhattan extends Link {
 			l = Math.min(endPadding, pts[pts.length-1].distance(pts[pts.length-2])/2);
 			pt = pts[pts.length - 1].getTranslated(dir.scale(l));
 			pts.splice(pts.length - 1, 0, pt);
-			_moveSegment(pts, i, d);
+			this._moveSegment(pts, i, d);
 			return;
 		}
 
