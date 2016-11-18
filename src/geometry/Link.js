@@ -235,7 +235,7 @@ class Manhattan extends Link {
 		if (this.randomNoise && pos.length > 3) {
 			for (var i = 1; i < pos.length - 2; i++) {
 				var randomNumber = Math.floor(Math.random() * this.randomNoise * 2 - this.randomNoise);
-				this._moveSegment(pos, 1, randomNumber, 1, 1);
+				this._moveSegment(pos, i, randomNumber, 1, 1);
 			}
 		}
 		return pos;
