@@ -204,6 +204,7 @@ class Manhattan extends Link {
 			MIN_BUFFER: 10,
 			autoRoute: false,
 			randomNoise: 0,
+			step: 1,
 			maxChannelWidth: 100
 		});
 		super(terminalVisual, shapeConfig, startMarker, endMarker);
@@ -234,7 +235,8 @@ class Manhattan extends Link {
 		Manhattan._mergeSegments(pos);
 		if (this.randomNoise && pos.length > 3) {
 			for (var i = 1; i < pos.length - 2; i++) {
-				var randomNumber = Math.floor(Math.random() * this.randomNoise * 2 - this.randomNoise);
+				var range = this.randomNoise / this.step;
+				var randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step;
 				this._moveSegment(pos, i, randomNumber, 1, 1);
 			}
 		}
