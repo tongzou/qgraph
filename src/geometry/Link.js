@@ -197,7 +197,6 @@ class EntityRelations extends Link {
 	}
 }
 
-
 class Manhattan extends Link {
 	constructor(terminalVisual, shapeConfig, startMarker, endMarker) {
 		shapeConfig = _.defaults(shapeConfig, {

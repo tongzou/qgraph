@@ -11,11 +11,9 @@
 </head>
 <body>
 <canvas id="ycanvas"></canvas>
-<input type="button" value="Performance Test" onclick="testPerformance()">
-<input type="button" value="Toggle Zoom" onclick="toggleZoom()">
-<input type="button" value="Test Image Capture" onclick="testImageCapture()">
 <input type="button" value="Start Viewer" onclick="startViewer()"/>
 <input type="button" value="Destroy Viewer" onclick="destroyViewer()"/>
+<input type="button" value="Test Image Capture" onclick="testImageCapture()">
 <div id="graph-demo" style="position:absolute;left:10px;right:10px;top:150px;bottom:10px;margin-top:20px"></div>
 <script type="text/javascript">
 var qg = window["qgraph"].default;
@@ -226,6 +224,8 @@ function testPerformance() {
 	var end = new Date().getTime();
 	alert((end-start)/1000);
 }
+
+startViewer();
 </script>
 </body>
 </html>
