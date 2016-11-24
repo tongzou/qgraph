@@ -1,29 +1,12 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
-
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+QGraph is a graph visualization library, it's still in a very early stage. 
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
+* Clone the repository and do npm install to install the dependencies.
+* To see it in action, open test/index.html. 
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* email tong@cal.berkeley.edu
