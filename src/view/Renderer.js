@@ -157,7 +157,7 @@ class Renderer {
 				jsClass = Utils.getConstructor(this.prop('selectionBehavior'));
 				this.selectionBehavior = new jsClass(this);
 			}
-			/*this.dispatcher.register('mouseup.node.label', function(type, ns, target, pos, event) {
+			this.dispatcher.register('mouseup.node.label', function(type, ns, target, pos, event) {
 				let node = this._graph.nodes[target.getAttribute('id')];
 				if (!this.dispatcher.dragging && !node._firstSelection) {
 					Label._delayEdit = _.delay(() => {
@@ -172,7 +172,7 @@ class Renderer {
 				if (!DomUtils.eventFromInput(event)) {
 					Label.editor.stop();
 				}
-			}, this);*/
+			}, this);
 		}
 		this.dispatcher.start();
 	}
