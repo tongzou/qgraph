@@ -232,10 +232,42 @@ class Manhattan extends Link {
 				this.autoRoute(pos, container.getBounds(document), boxes, startBox, endBox);
 		}
 		Manhattan._mergeSegments(pos);
-		if (this.randomNoise && pos.length > 3) {
+		var noise;
+		if (this.randomNoise && pos.length == 4) {
+			if (this.startNormal.x != 0 && this.startNormal.x != this.endNormal.x) {
+				if (this.randomNoise <= Math.abs(pos[1].x - pos[0].x - this.startNormal.x * this.MIN_BUFFER)) {
+					noise = this.randomNoise;
+				} else {
+					noise = Math.abs(pos[1].x - pos[0].x - this.startNormal.x * this.MIN_BUFFER);
+				}
+			} else if (this.startNormal.y != 0 && this.startNormal.y != this.endNormal.y) {
+				if (this.randomNoise <= Math.abs(pos[1].y - pos[0].y - this.startNormal.y * this.MIN_BUFFER)) {
+					noise = this.randomNoise;
+				} else {
+					noise = Math.abs(pos[1].y - pos[0].y - this.startNormal.y * this.MIN_BUFFER);
+				}
+			}  else {
+				noise = this.randomNoise;
+			}
+			var range = noise / this.step;
+			var randomNumber;
+			if (this.startNormal.x != this.endNormal.x || this.startNormal.y != this.endNormal.y) {
+				randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step;
+			} else {
+				randomNumber = Math.sign(this.startNormal.x != 0 ? this.startNormal.x : this.startNormal.y) * Math.floor(Math.random() * range + 1) * this.step;
+			}
+			this._moveSegment(pos, 1, randomNumber, 1, 1);
+		}
+		if (this.randomNoise && pos.length > 4) {
 			for (var i = 1; i < pos.length - 2; i++) {
-				var range = this.randomNoise / this.step;
-				var randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step;
+				range = this.randomNoise / this.step;
+				if (i == 1) {
+					randomNumber = Math.sign(this.startNormal.x != 0 ? this.startNormal.x : this.startNormal.y) * Math.floor(Math.random() * range + 1) * this.step;
+				} else if (i == pos.length - 3) {
+					randomNumber = Math.sign(this.endNormal.x != 0 ? this.endNormal.x : this.endNormal.y) * Math.floor(Math.random() * range + 1) * this.step;
+				}else {
+					randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step;
+				}
 				this._moveSegment(pos, i, randomNumber, 1, 1);
 			}
 		}
