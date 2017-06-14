@@ -70,10 +70,10 @@ class Graph {
 	}
 
 	static getJSClass(config, defaultClass) {
-		var jsClass = null;
+		let jsClass = null;
 		if (config && config.type) {
 			// See if we can get the js class from config.
-			var type = Utils.type(defaultClass.namespace, config.type);
+			let type = Utils.type(defaultClass.namespace, config.type);
 			if (type)
 				jsClass = type.jsClass;
 		}
@@ -83,6 +83,10 @@ class Graph {
 
 	/**
 	 * Create a new Node
+	 * @param config
+	 * @param parent
+	 * @param pos
+	 * @returns {*}
 	 */
 	addNode(config, parent = this.currentRoot, pos) {
 		let NodeClass = Graph.getJSClass(config, Node);
@@ -99,6 +103,14 @@ class Graph {
 		return node;
 	}
 
+	/**
+	 * Create a new Edge
+	 * @param config
+	 * @param parent
+	 * @param from
+	 * @param to
+	 * @returns {*}
+	 */
 	addEdge(config, parent = this.currentRoot, from, to) {
 		let EdgeClass = Graph.getJSClass(config, Edge);
 		let edge = new EdgeClass(this, config, from, to);
@@ -108,6 +120,11 @@ class Graph {
 		return edge;
 	}
 
+	/**
+	 * Added a new child to the parent. The parent has to be a node.
+	 * @param parent
+	 * @param child
+	 */
 	static addChild(parent, child) {
 		if (!parent.children)
 			parent.children = [];
@@ -122,12 +139,12 @@ class Graph {
 	}
 
 	loadModel(model, parent = this.currentRoot) {
-		var nodes = model.nodes;
-		var edges = model.edges;
+		let nodes = model.nodes;
+		let edges = model.edges;
 		delete model.nodes;
 		delete model.edges;
 
-		var node = this.addNode(model, parent);
+		let node = this.addNode(model, parent);
 		if (nodes) {
 			_.forEach(nodes, (child) => {
 				this.loadModel(child, node);

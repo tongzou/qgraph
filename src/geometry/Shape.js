@@ -47,7 +47,8 @@ class Shape {
 	/**
 	 * Get the intersection between boundary of this shape and the line connecting (x,y) with the refPt.
 	 * @param refPt
-	 * @returns {null}
+	 * @param orthogonal
+	 * @returns {*|{point, direction}}
 	 */
 	getPerimeter(refPt, orthogonal = false) {
 		return this.constructor.getPerimeter(this, refPt, orthogonal);

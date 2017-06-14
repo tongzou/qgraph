@@ -45,7 +45,7 @@ class Link {
 	}
 
 	/**
-	 * Calculate the position where to put modifiers or label..
+	 * Calculate the position where to put decorators or label..
 	 *
 	 * @param geometry: defines how far along the edge should the point be placed.
 	 * @return *[] the relative position.
@@ -108,13 +108,13 @@ class BezierLink extends Link {
 		let pts = [];
 		pts[0] = null;
 		pts[1] = [];
-		if (this.startNormal.x == 0) {
+		if (this.startNormal.x === 0) {
 			pts[1][0] = new Point(s.x, (s.y + e.y)/2);
 		}
 		else {
 			pts[1][0] = new Point((s.x + e.x)/2, s.y);
 		}
-		if (this.endNormal.x == 0) {
+		if (this.endNormal.x === 0) {
 			pts[1][1] = new Point(e.x, (s.y + e.y)/2);
 		}
 		else {
@@ -146,31 +146,31 @@ class BezierLink extends Link {
 
 class EntityRelations extends Link {
 	get points() {
-		var source = Port.getBounds(edge, true);
-		var target = Port.getBounds(edge, false);
-		var isSourceLeft = target.right() < source.x;
-		var isTargetLeft = source.right() < target.x;
-		var result = [];
+		let source = Port.getBounds(edge, true);
+		let target = Port.getBounds(edge, false);
+		let isSourceLeft = target.right() < source.x;
+		let isTargetLeft = source.right() < target.x;
+		let result = [];
 
-		var x0 = (isSourceLeft) ? source.x : source.x + source.width;
-		var y0 = source.getCenterY();
+		let x0 = (isSourceLeft) ? source.x : source.x + source.width;
+		let y0 = source.getCenterY();
 		result.push(new Point(x0, y0));
 
-		var xe = (isTargetLeft) ? target.x : target.x + target.width;
-		var ye = target.getCenterY();
+		let xe = (isTargetLeft) ? target.x : target.x + target.width;
+		let ye = target.getCenterY();
 
-		var seg = this.segment;
+		let seg = this.segment;
 
-		var dx = (isSourceLeft) ? -seg : seg;
-		var dep = new Point(x0 + dx, y0);
+		let dx = (isSourceLeft) ? -seg : seg;
+		let dep = new Point(x0 + dx, y0);
 
 		dx = (isTargetLeft) ? -seg : seg;
-		var arr = new Point(xe + dx, ye);
+		let arr = new Point(xe + dx, ye);
 
 		// Adds intermediate points if both go out on same side
 		if (isSourceLeft == isTargetLeft)
 		{
-			var x = (isSourceLeft) ?
+			let x = (isSourceLeft) ?
 			Math.min(x0, xe)-seg :
 			Math.max(x0, xe)+seg;
 
@@ -179,7 +179,7 @@ class EntityRelations extends Link {
 		}
 		else if ((dep.x < arr.x) == isSourceLeft)
 		{
-			var midY = y0 + (ye - y0) / 2;
+			let midY = y0 + (ye - y0) / 2;
 
 			result.push(dep);
 			result.push(new Point(dep.x, midY));
@@ -213,11 +213,11 @@ class Manhattan extends Link {
 		let pos = Manhattan.route(this.start, this.end, this.startNormal, this.endNormal, this.MIN_BUFFER);
 		if (this.autoRoute) {
 			this._mergeSegments(pos);
-			var boxes = [], node, startBox, endBox;
-			var container = edge.source.getCommonAncestor(edge.target);
-			var childNodes = container.getDescendants();
-			var index = 0;
-			for (var i = 0; i < childNodes.length; i++) {
+			let boxes = [], node, startBox, endBox;
+			let container = edge.source.getCommonAncestor(edge.target);
+			let childNodes = container.getDescendants();
+			let index = 0;
+			for (let i = 0; i < childNodes.length; i++) {
 				node = childNodes[i];
 				// Do not include source or target ancestors in routing.
 				if (node.excludeFromRouting(edge) || node.isAncestor(edge.source) || node.isAncestor(edge.target)) continue;
@@ -233,9 +233,9 @@ class Manhattan extends Link {
 		}
 		Manhattan._mergeSegments(pos);
 		if (this.randomNoise && pos.length > 3) {
-			for (var i = 1; i < pos.length - 2; i++) {
-				var range = this.randomNoise / this.step;
-				var randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step;
+			for (let i = 1; i < pos.length - 2; i++) {
+				let range = this.randomNoise / this.step;
+				let randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step;
 				this._moveSegment(pos, i, randomNumber, 1, 1);
 			}
 		}
@@ -244,10 +244,10 @@ class Manhattan extends Link {
 
 	//New function for finding route
 	static route(start, end, startNormal, endNormal, buffer) {
-		var startBuffer = new Point(start.x + startNormal.x * buffer, start.y + startNormal.y * buffer);
-		var endBuffer = new Point(end.x + endNormal.x * buffer, end.y + endNormal.y * buffer);
-		var startBufferNormal, endBufferNormal;
-		var pts;
+		let startBuffer = new Point(start.x + startNormal.x * buffer, start.y + startNormal.y * buffer);
+		let endBuffer = new Point(end.x + endNormal.x * buffer, end.y + endNormal.y * buffer);
+		let startBufferNormal, endBufferNormal;
+		let pts;
 		if (startNormal.x != 0) {
 			if ((endBuffer.x - startBuffer.x) / startNormal.x > 0) {
 				startBufferNormal = startNormal;
@@ -282,7 +282,7 @@ class Manhattan extends Link {
 		}
 
 		if (startBufferNormal.dotProduct(endBufferNormal) == 0) {
-			var middle = (startBufferNormal.x == 0) ? new Point(startBuffer.x, endBuffer.y) : new Point(endBuffer.x, startBuffer.y);
+			let middle = (startBufferNormal.x == 0) ? new Point(startBuffer.x, endBuffer.y) : new Point(endBuffer.x, startBuffer.y);
 			pts = [start, startBuffer, middle, endBuffer, end];
 		}
 		else if (startBufferNormal.dotProduct(endBufferNormal) < 0) {
@@ -297,9 +297,9 @@ class Manhattan extends Link {
 			pts = [start, startBuffer, new Point(startBuffer.x + startBufferNormal.x * buffer, startBuffer.y + startBufferNormal.y * buffer), new Point(endBuffer.x + endBufferNormal.x * buffer, endBuffer.y + endBufferNormal.y * buffer), endBuffer, end];
 		}
 
-		var prunePts = [];
+		let prunePts = [];
 		prunePts[0] = pts[0];
-		for (var i = 1; i < pts.length - 1; i++) {
+		for (let i = 1; i < pts.length - 1; i++) {
 			if ((pts[i].x == pts[i-1].x && pts[i].x == pts[i+1].x) || (pts[i].y == pts[i-1].y && pts[i].y == pts[i+1].y)) {
 				continue;
 			}
@@ -313,10 +313,10 @@ class Manhattan extends Link {
 	 * Automatically route the connection to avoid intersections with other vertices.
 	 */
 	autoRoute(pts, container, boxes, startBox, endBox) {
-		var side, side2, d, box, intersect, j;
-		var channel, channel2, pt, dir;
+		let side, side2, d, box, intersect, j;
+		let channel, channel2, pt, dir;
 
-		var startPadding = 0, endPadding;
+		let startPadding = 0, endPadding;
 		// first get the start and end channel
 		box = boxes[endBox];
 		pt = pts[pts.length - 2];
@@ -331,7 +331,7 @@ class Manhattan extends Link {
 		channel = _getChannel(container, endBox, boxes, side);
 		endPadding = channel.horizontal ? (channel.right - channel.left)/2 : (channel.bottom - channel.top)/2;
 
-		for (var i = 0; i < pts.length - 1; i++) {
+		for (let i = 0; i < pts.length - 1; i++) {
 			if (pts[i+1].x == pts[i].x && pts[i+1].y == pts[i].y) continue;
 			intersect = _getFirstIntersection(pts, i, boxes, startBox, endBox);
 			if (!intersect) continue;
@@ -403,8 +403,8 @@ class Manhattan extends Link {
 	}
 
 	static _hasIntersection(pts, boxes) {
-		for (var i = 0; i < pts.length - 1; i++) {
-			for (var j = 0; j < boxes.length; j++) {
+		for (let i = 0; i < pts.length - 1; i++) {
+			for (let j = 0; j < boxes.length; j++) {
 				if (boxes[j].detectIntersection(pts[i], pts[i+1]) >= 0)
 					return true;
 			}
@@ -413,8 +413,8 @@ class Manhattan extends Link {
 	}
 
 	static _getFirstIntersection(pts, i, boxes, startBox, endBox) {
-		var box, side, savedIndex = null, savedSide = null;
-		for (var j = 0; j < boxes.length; j++) {
+		let box, side, savedIndex = null, savedSide = null;
+		for (let j = 0; j < boxes.length; j++) {
 			if ((i == 0 && j == startBox) || (i == pts.length - 2 && j == endBox))
 				continue;
 			box = boxes[j];
@@ -437,8 +437,8 @@ class Manhattan extends Link {
 	}
 
 	_getRouteTendency(pts, i, breakPt, box, side) {
-		var dir;
-		var p;
+		let dir;
+		let p;
 		switch (side) {
 			case 0:
 			case 2:
@@ -480,10 +480,10 @@ class Manhattan extends Link {
 	}
 
 	_getChannel(container, index, boxes, side) {
-		var maxChannelWidth = this.maxChannelWidth;
-		var box1 = boxes[index], box2;
-		var pt, i;
-		var channel = {}, l, t, b, r;
+		let maxChannelWidth = this.maxChannelWidth;
+		let box1 = boxes[index], box2;
+		let pt, i;
+		let channel = {}, l, t, b, r;
 		switch (side) {
 			case 0:
 				pt = box1.getLeft();
@@ -633,7 +633,7 @@ class Manhattan extends Link {
 	 */
 	_moveSegment(pts, i, d, startPadding, endPadding) {
 		// first check if we need to add new line segments.
-		var dir, l, pt;
+		let dir, l, pt;
 		if (i == 0) {
 			// we need to break off the segment, since we can't change the starting point.
 			dir = pts[0].getDirection(pts[1]);
@@ -682,9 +682,9 @@ class Manhattan extends Link {
 	 * This method will merge the redundant segments.
 	 */
 	static _mergeSegments(pts) {
-		var h1 = pts[pts.length-1].y == pts[pts.length-2].y;
-		var h2;
-		for (var i = pts.length - 2; i >= 1; i--) {
+		let h1 = pts[pts.length-1].y == pts[pts.length-2].y;
+		let h2;
+		for (let i = pts.length - 2; i >= 1; i--) {
 			h2 = pts[i].y == pts[i-1].y;
 			if (h2 == h1 || (pts[i].equals(pts[i-1])))
 				pts.splice(i, 1);

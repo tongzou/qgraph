@@ -8,6 +8,7 @@ import Line from "./geometry/Line";
 import Shape from "./geometry/Shape";
 import Rectangle from "./geometry/Rectangle";
 import Ellipse from "./geometry/Ellipse";
+import Rhombus from "./geometry/Rhombus";
 import Link from "./geometry/Link";
 import Events from "bean";
 import EventDispatcher from "./event/EventDispatcher";
@@ -26,6 +27,7 @@ import SelectionBehavior from "./behavior/SelectionBehavior";
 
 Shape.addShape("Rectangle", Rectangle);
 Shape.addShape("Ellipse", Ellipse);
+Shape.addShape("Rhombus", Rhombus);
 
 export default {
 	Events,

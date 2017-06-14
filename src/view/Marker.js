@@ -6,8 +6,8 @@ let Marker = (function() {
 
 	/** Begin Standard Marker Type **/
 	function arrow(size, source, styles) {
-		var sign = source ? -1 : 1;
-		var marker = {
+		let sign = source ? -1 : 1;
+		let marker = {
 			viewBox: new Rectangle(-5, -5, 10, 10),
 			size: size,
 			ref: [4*sign, 0],
@@ -21,8 +21,8 @@ let Marker = (function() {
 	}
 
 	function triangle(size, source, styles) {
-		var sign = source ? -1 : 1;
-		var marker = {
+		let sign = source ? -1 : 1;
+		let marker = {
 			viewBox: new Rectangle(-5, -5, 10, 10),
 			size: size,
 			ref: [4*sign, 0],
@@ -36,8 +36,8 @@ let Marker = (function() {
 	}
 
 	function oval(size, source, styles) {
-		var r = size / 2;
-		var marker = {
+		let r = size / 2;
+		let marker = {
 			viewBox: new Rectangle(-r, -r, size, size),
 			size: size,
 			ref: [0, 0],
@@ -48,20 +48,23 @@ let Marker = (function() {
 	}
 
 	function diamond(size, source, styles) {
-		var sign = source ? -1 : 1;
-		var marker = {
+		let sign = source ? -1 : 1;
+		let marker = {
 			viewBox: new Rectangle(-5, -5, 10, 10),
 			size: size,
 			ref: [4*sign, 0],
 			fill: styles.color
 		};
-		marker.shape = '';
+		marker.shape = {
+			name: 'Polygon',
+			points: [[-4, 0], [0, 4], [4, 0], [0, -4]]
+		};
 		return marker;
 	}
 	/** End Standard Marker Type **/
 	function getMarker(config, source) {
-		var factory = registry[config.type];
-		var marker = factory(config.size, source, config);
+		let factory = registry[config.type];
+		let marker = factory(config.size, source, config);
 		marker.id = config.id;
 		return marker;
 	}

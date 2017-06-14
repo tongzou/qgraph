@@ -1,13 +1,13 @@
 /**
- * The modifier decorates the vertex or the edge.
+ * The Decorator decorates the vertex or the edge.
  *
-var Modifier = gfw.Modifier = function(cell, config) {
+var Decorator = function(cell, config) {
 	this.cell = cell;
 	this.init(config);
 };
-_.extend(Modifier.prototype, TypedConfig);
+_.extend(Decorator.prototype, TypedConfig);
 
-Modifier.prototype.getBounds = function() {
+Decorator.prototype.getBounds = function() {
 	if (this.bounds)
 		return this.bounds;
 
@@ -18,7 +18,7 @@ Modifier.prototype.getBounds = function() {
 	return this.bounds = new Rectangle(pos[0], pos[1], setting.width, setting.height);
 };
 
-Modifier.prototype.getLabelNode = function() {
+Decorator.prototype.getLabelNode = function() {
 	if (this.labelNode)
 		return this.labelNode;
 
@@ -27,4 +27,4 @@ Modifier.prototype.getLabelNode = function() {
 	return this.labelNode = Label.getLabelNode(label, this.getProperty("width"), this.getProperty("height"), this.getProperty("labelConfig"));
 };
 
-Modifier.prototype.isContainer = function() { return false; };*/
+Decorator.prototype.isContainer = function() { return false; };*/

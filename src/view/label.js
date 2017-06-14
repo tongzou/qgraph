@@ -39,7 +39,7 @@ export default (function() {
 		if (!stringMeasureEl) {
 			stringMeasureEl = DomUtils.createElement('iframe', {id:"_ComputeStylesIframe"}, {position:"absolute", visibility:"hidden", width:"auto"});
 			document.body.appendChild(stringMeasureEl);
-			var doc = stringMeasureEl.contentWindow.document;
+			let doc = stringMeasureEl.contentWindow.document;
 			doc.open();
 			doc.write('<html><body>\
 				<div id="baselineDiv" style="height:100px;"><span style="line-height:0">T</span><span style="height:100%;display:inline-block;"></span></div>\
@@ -86,18 +86,18 @@ export default (function() {
 			return arr;
 		}
 
-		var width = 0;
+		let width = 0;
 		//split the text by lines
-		var lines = string.split('\n');
+		let lines = string.split('\n');
 
-		var buf = new StringBuffer();
+		let buf = new StringBuffer();
 
-		for (var j = 0; j < lines.length; j++) {
+		for (let j = 0; j < lines.length; j++) {
 			//split each line by word
-			var words = lines[j].split(/\s/);
-			var line = "", currentWidth = 0, wordWidth = 0, newLine = true, word;
+			let words = lines[j].split(/\s/);
+			let line = "", currentWidth = 0, wordWidth = 0, newLine = true, word;
 
-			for (var i = 0; i < words.length; i++) {
+			for (let i = 0; i < words.length; i++) {
 				word = words[i];
 				wordWidth = getStringSize(word, fontSize, fontFamily, bold).width;
 
@@ -235,6 +235,7 @@ export default (function() {
 		return view.renderLabel(box);
 	}
 
+	// This is the inline editor for editing label text in place.
 	let editor = {
 		start: function(key, container, box, refEl, textEl, scale = 1.0, singleLine = true) {
 			if (this.input) {
@@ -244,7 +245,7 @@ export default (function() {
 				} else
 					return;
 			}
-			var tag = singleLine ? 'input' : 'textarea';
+			let tag = singleLine ? 'input' : 'textarea';
 			this.input = DomUtils.createElement(tag, {id:"inlineEditor", unselectable:"off"}, {position:"absolute", overflow:"hidden", padding:"0px", margin:"0px", border:"transparent"});
 			if (singleLine) {
 				Events.on(this.input, 'keydown keyup', (event) => {
@@ -294,13 +295,14 @@ export default (function() {
 			if (this.textEl)
 				this.textEl.style.visibility = null;
 
+			// remove the input
+			this.input.parentNode.removeChild(this.input);
+
 			if (!cancel)
 				Events.fire(this, 'editor.update', [this.key, this.input.value]);
 
 			Events.fire(this, 'editor.stop', [this.key]);
 
-			// remove the input
-			this.input.parentNode.removeChild(this.input);
 			delete this.input;
 			delete this.key;
 			delete this.box;

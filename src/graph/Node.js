@@ -2,6 +2,9 @@ import _ from "lodash";
 import StringBuffer from "../util/StringBuffer";
 import Cell from "./Cell";
 
+/**
+ * A Node represents vertex of the graph.
+ */
 class Node extends Cell {
 	constructor(graph, config = {}) {
 		if (!config.id) config.id = _.uniqueId('N');
@@ -15,7 +18,7 @@ class Node extends Cell {
 
 	isAncestor(n) {
 		// TODO: should we move this to graph class ?
-		var node = n.parent;
+		let node = n.parent;
 		while (node) {
 			if (this == node) { return true; }
 			node = node.parent;
@@ -24,8 +27,8 @@ class Node extends Cell {
 	}
 
 	removeEdge(edge) {
-		var edges = edge.source == this ? this.outEdges : this.inEdges;
-		for (var i = 0; i < edges.length; i++) {
+		let edges = edge.source == this ? this.outEdges : this.inEdges;
+		for (let i = 0; i < edges.length; i++) {
 			if (edge == edges[i]) {
 				edges.splice(i, 1);
 				break;
@@ -69,7 +72,7 @@ class Node extends Cell {
 	}
 
 	toString() {
-		var label = this.prop("label") ? this.prop("label") : "undefined";
+		let label = this.prop("label") ? this.prop("label") : "undefined";
 		if (_.isArray(label))
 			label = label[0];
 		return 'Node:{id:' + this.id + ';label:' + label + ';type:' + this.props.constructor.typeName + '}';
@@ -89,7 +92,7 @@ Vertex.prototype.getDrillDownParent = function() {
 };
 
 Vertex.prototype.isLocked = function() {
-	var mode = this.getProperty("mode") || 3;
+	let mode = this.getProperty("mode") || 3;
 	return !(mode & Graph.ALLOW_INTERACTIONS);
 };
 

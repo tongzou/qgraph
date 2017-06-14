@@ -1,7 +1,6 @@
 import _ from "lodash";
 import Events from "bean";
 import * as KeyUtils from "./KeyUtils";
-import Utils from "../util/Utils";
 import DomUtils from "../util/DomUtils";
 import StringBuffer from "./../util/StringBuffer";
 
@@ -9,6 +8,10 @@ const DEFAULTS = {
 	stopPropagation: false
 };
 
+/**
+ * The EventDispatcher is the central event management. It will monitor all events and translate it into the a higher
+ * level events for consumption.
+ */
 export default class EventDispatcher {
 	/**
 	 * Constructor
@@ -200,7 +203,7 @@ export default class EventDispatcher {
 		const getNS = function(index) {
 			let buf = new StringBuffer();
 			for (let i = 0; i <= index; i++) {
-				var val = stack[i].getAttribute("ns");
+				let val = stack[i].getAttribute("ns");
 				if (_.startsWith(val, "root."))
 					val = val.substring(5);
 				buf.append(val);
@@ -312,7 +315,7 @@ export default class EventDispatcher {
 			return;
 		}
 		const listener = {callback: callback, context: context, zIndex: zIndex};
-		var regexp = null;
+		let regexp = null;
 		if (type instanceof RegExp) {
 			regexp = type;
 			type = type + '';
@@ -370,14 +373,14 @@ export default class EventDispatcher {
 
 	static mouse(container, e) {
 		if (e.changedTouches) e = e.changedTouches[0];
-		var svg = container.ownerSVGElement || container;
+		let svg = container.ownerSVGElement || container;
 		if (svg.createSVGPoint) {
-			var point = svg.createSVGPoint();
+			let point = svg.createSVGPoint();
 			point.x = e.clientX; point.y = e.clientY;
 			point = point.matrixTransform(container.getScreenCTM().inverse());
 			return [point.x, point.y];
 		}
-		var rect = container.getBoundingClientRect();
+		let rect = container.getBoundingClientRect();
 		return [e.clientX - rect.left - container.clientLeft, e.clientY - rect.top - container.clientTop];
 	}
 }

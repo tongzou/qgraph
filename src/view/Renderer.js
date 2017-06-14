@@ -31,9 +31,11 @@ class Renderer {
 		this.connectionBehavior = null;
 		Utils.initConfig(this, config);
 
-		Events.on(Label.editor, 'editor.update.*', function(key, value) {
+		Events.on(Label.editor, 'editor.update.*', _.bind(function(key, value) {
+			//this.graph.nodes[key].prop('label', value);
+			//this.render();
 			console.log(key + '=' + value);
-		});
+		}, this));
 	}
 
 	get graph() {
@@ -52,14 +54,14 @@ class Renderer {
 	viewport(scaled, viewport) {
 		if (_.isUndefined(scaled) || _.isNull(scaled)) scaled = false;
 		if (!viewport) {
-			var vp = new Rectangle(0, 0, this.box.offsetWidth, this.box.offsetHeight);
+			let vp = new Rectangle(0, 0, this.box.offsetWidth, this.box.offsetHeight);
 			if (scaled)
 				return Utils.scale(this.translate, this.scale, vp);
 			return vp;
 		}
 		if (!scaled) viewport = Utils.scale(this.translate, this.scale, viewport);
-		var w = this.box.offsetWidth;
-		var scale = w / viewport.width;
+		let w = this.box.offsetWidth;
+		let scale = w / viewport.width;
 		this.transform(-viewport.x*scale, -viewport.y*scale, scale);
 	}
 
@@ -78,10 +80,10 @@ class Renderer {
 				k = 1.0;
 				break;
 			case "fit":
-				var gridSize = this.prop("gridSize") * 2;
+				let gridSize = this.prop("gridSize") * 2;
 
-				var gBounds = this.getBounds();
-				var vBounds = this.viewport();
+				let gBounds = this.getBounds();
+				let vBounds = this.viewport();
 
 				vBounds.width -= gridSize;
 				vBounds.height -= gridSize;
@@ -188,14 +190,14 @@ class Renderer {
 	 * @returns {*}
 	 */
 	getTemplate(key, config, preprocessor) {
-		var t = this.constructor.TEMPLATES[key];
+		let t = this.constructor.TEMPLATES[key];
 		if (t && _.isFunction(t)) {
 			t = t(config);
 		}
 		// check if there are any preprocessing tags.
 		if (preprocessor) {
-			var parts = t.match(/(#{[^#]*})/g);
-			var obj = {};
+			let parts = t.match(/(#{[^#]*})/g);
+			let obj = {};
 			for (let part in parts) {
 				part = parts[part];
 				part = part.substring(2, part.length -1).trim();
