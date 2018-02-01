@@ -43,7 +43,7 @@ export default (function() {
 			doc.open();
 			doc.write('<html><body>\
 				<div id="baselineDiv" style="height:100px;"><span style="line-height:0">T</span><span style="height:100%;display:inline-block;"></span></div>\
-				<div id="measureDiv" style="position:absolute;width:auto;height:auto;padding:0;white-space:pre-wrap;word-wrap:break-word;display:inline-block;"></div>\
+				<div id="measureDiv" style="position:absolute;width:auto;height:auto;padding:0;white-space:nowrap;display:inline-block;"></div>\
 				</body></html>');
 			doc.close();
 			measureDiv = doc.getElementById("measureDiv");
