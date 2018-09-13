@@ -1,20 +1,27 @@
 {
   "parser": "babel-eslint",
 
-  "ecmaFeatures": {
-    "modules" : true,
-    "classes" : true
-  },
-
   "env": {
     "browser": true,
     "node": true,
-    "es6": true
+    "es6": true,
+    "jest": true
   },
 
+  "globals": {
+    "document": false,
+    "escape": false,
+    "navigator": false,
+    "unescape": false,
+    "window": false,
+    "canvg": false,
+    "jsCanvas": false
+  },
+
+  "extends": "standard",
+
   "rules": {
-    "strict": 0,
-    "no-unused-vars": [2, {"vars": "all", "args": "none"}],
-    "no-underscore-dangle" : 0
+    "arrow-parens": 0,
+    "generator-star-spacing": 0
   }
 }

@@ -1,8 +1,9 @@
-var qd = require("../dist/qgraph.js").default;
+import qg from 'qgraph'
 
-var buf = new qd.StringBuffer("hey dude");
-console.log(buf.toString());
-
-var manager = new qd.EventManager({});
-
-console.log(manager.start());
+describe('Util tests', () => {
+  test('stringbuffer', () => {
+    const buf = new qg.StringBuffer('hey dude')
+    console.log(buf.toString())
+    expect(buf.toString()).toBe('hey dude')
+  })
+})

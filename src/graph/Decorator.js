@@ -27,4 +27,4 @@ Decorator.prototype.getLabelNode = function() {
 	return this.labelNode = Label.getLabelNode(label, this.getProperty("width"), this.getProperty("height"), this.getProperty("labelConfig"));
 };
 
-Decorator.prototype.isContainer = function() { return false; };*/
+Decorator.prototype.isContainer = function() { return false; }; */

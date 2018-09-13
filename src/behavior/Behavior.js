@@ -1,9 +1,9 @@
 export default class Behavior {
-	constructor(renderer) {
-		this.renderer = renderer;
-	}
+  constructor (renderer) {
+    this.renderer = renderer
+  }
 
-	destroy() {
-		delete this.renderer;
-	}
+  destroy () {
+    delete this.renderer
+  }
 }
