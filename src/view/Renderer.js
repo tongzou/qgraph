@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import Events from '../event/events'
+import Events from '../../lib/bean'
 import Utils from '../util/Utils'
 import DomUtils from '../util/dom-utils'
 import Layout from '../layout/Layout'

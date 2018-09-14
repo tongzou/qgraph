@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import Events from './events'
+import Events from '../../lib/bean'
 import * as KeyUtils from './key-utils'
 import DomUtils from '../util/dom-utils'
 import StringBuffer from '../util/string-buffer'
@@ -7,6 +7,9 @@ import StringBuffer from '../util/string-buffer'
 const DEFAULTS = {
   stopPropagation: false
 }
+
+const win = typeof window !== 'undefined' ? window : { addEventHandler: function () {} }
+const doc = typeof document !== 'undefined' ? document : {}
 
 /**
  * The EventDispatcher is the central event management. It will monitor all events and translate it into the a higher
@@ -55,11 +58,11 @@ export default class EventDispatcher {
   }
 
   startKeys () {
-    Events.on(document, 'keydown keyup', this.handler)
+    Events.on(doc, 'keydown keyup', this.handler)
   }
 
   stopKeys () {
-    Events.off(document, 'keydown keyup', this.handler)
+    Events.off(doc, 'keydown keyup', this.handler)
   }
 
   zoomIn () {
@@ -80,7 +83,7 @@ export default class EventDispatcher {
     let ns
     const stack = []
     let isRoot = false
-    while (!isRoot && target && target !== document) {
+    while (!isRoot && target && target !== doc) {
       ns = target.getAttribute('ns')
       if (ns) {
         isRoot = _.startsWith(ns, 'root.')
@@ -180,12 +183,12 @@ export default class EventDispatcher {
           this.dispatch(event, 'mouseup', ns, info.data, dragPos)
         }
 
-        Events.off(null, 'mousemove', mousemove)
-        Events.off(null, 'mouseup', mouseup)
+        Events.off(win, 'mousemove', mousemove)
+        Events.off(win, 'mouseup', mouseup)
       }
       event.preventDefault()
-      Events.on(null, 'mousemove', mousemove)
-      Events.on(null, 'mouseup', mouseup)
+      Events.on(win, 'mousemove', mousemove)
+      Events.on(win, 'mouseup', mouseup)
     }
 
     if (!isKeyEvent) {
