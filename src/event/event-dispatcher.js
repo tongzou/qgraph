@@ -30,7 +30,7 @@ export default class EventDispatcher {
     this.scale = 1.0
     this.listeners = {}
     this.dragging = false
-    this.handler = () => { this.handleEvent() }
+    this.handler = (event) => { this.handleEvent(event) }
     this.started = false
 
     // Simulate mouseenter/mouseleave events
