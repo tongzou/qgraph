@@ -27,7 +27,7 @@ class Link {
     this.endNormal = terminalVisual[1].direction
     this.startMarker = startMarker
     this.endMarker = endMarker
-    _.assign(this, shapeConfig)
+    Object.assign(this, shapeConfig)
   }
 
   render (view) {

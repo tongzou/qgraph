@@ -26,11 +26,11 @@ export default class EventDispatcher {
     this.root = root
     this.rootNS = root.getAttribute('ns') || 'root'
     this.zoomScale = zoomScale
-    _.assign(this, DEFAULTS, config)
+    Object.assign(this, DEFAULTS, config)
     this.scale = 1.0
     this.listeners = {}
     this.dragging = false
-    this.handler = _.bind(this.handleEvent, this)
+    this.handler = () => { this.handleEvent() }
     this.started = false
 
     // Simulate mouseenter/mouseleave events
@@ -86,7 +86,7 @@ export default class EventDispatcher {
     while (!isRoot && target && target !== doc) {
       ns = target.getAttribute('ns')
       if (ns) {
-        isRoot = _.startsWith(ns, 'root.')
+        isRoot = ns.startsWith('root.')
         if (isRoot) {
           ns = ns.substring(5)
           event.rootTarget = target
@@ -218,7 +218,7 @@ export default class EventDispatcher {
       let buf = new StringBuffer()
       for (let i = 0; i <= index; i++) {
         let val = stack[i].getAttribute('ns')
-        if (_.startsWith(val, 'root.')) {
+        if (val.startsWith('root.')) {
           val = val.substring(5)
         }
         buf.append(val)
@@ -288,8 +288,8 @@ export default class EventDispatcher {
    * // Key is object {ctrl, alt, shift, meta, code}
    */
   registerKey (type, key, callback, context) {
-    if (_.isArray(key)) {
-      _.forEach(key, (k) => {
+    if (Array.isArray(key)) {
+      key.forEach(k => {
         this.registerKey(type, k, callback, context)
       })
       return
@@ -304,8 +304,8 @@ export default class EventDispatcher {
   }
 
   unregisterKey (type, key, callback, context) {
-    if (_.isArray(key)) {
-      _.forEach(key, (k) => {
+    if (Array.isArray(key)) {
+      key.forEach(k => {
         this.unregisterKey(type, k, callback, context)
       })
       return
@@ -329,8 +329,8 @@ export default class EventDispatcher {
    * Registers an event handler
    */
   register (type, callback, context, zIndex) {
-    if (_.isArray(type)) {
-      _.forEach(type, (t) => {
+    if (Array.isArray(type)) {
+      type.forEach(t => {
         this.register(t, callback, context, zIndex)
       })
       return

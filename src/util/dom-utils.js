@@ -224,5 +224,26 @@ export default {
   eventFromInput: function (e) {
     var tagName = e.target.tagName
     return (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT')
+  },
+
+  /**
+   * Wait for the element with the specified id to come into existence. Returns a promise
+   * @param {*} id The id of the element to wait for
+   */
+  waitForElement (id) {
+    return new Promise(resolve => {
+      const el = document.getElementById(id)
+      if (!el.length) {
+        const interval = setInterval(() => {
+          const el = document.getElementById(id)
+          if (el.length) {
+            clearInterval(interval)
+            return resolve(el[0])
+          }
+        }, 200)
+      } else {
+        return resolve(el[0])
+      }
+    })
   }
 }
