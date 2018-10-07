@@ -233,16 +233,16 @@ export default {
   waitForElement (id) {
     return new Promise(resolve => {
       const el = document.getElementById(id)
-      if (!el.length) {
+      if (!el) {
         const interval = setInterval(() => {
           const el = document.getElementById(id)
-          if (el.length) {
+          if (el) {
             clearInterval(interval)
-            return resolve(el[0])
+            return resolve(el)
           }
         }, 200)
       } else {
-        return resolve(el[0])
+        return resolve(el)
       }
     })
   }
