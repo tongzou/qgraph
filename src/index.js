@@ -10,6 +10,7 @@ import Rectangle from './geometry/Rectangle'
 import Ellipse from './geometry/Ellipse'
 import Rhombus from './geometry/Rhombus'
 import Link from './geometry/Link'
+import Events from '../lib/bean'
 import EventDispatcher from './event/event-dispatcher'
 import Graph from './graph/Graph'
 import Cell from './graph/Cell'
@@ -40,6 +41,7 @@ export default {
   Rectangle,
   Ellipse,
   Link,
+  Events,
   EventDispatcher,
   Label,
   Marker,
