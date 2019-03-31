@@ -3,6 +3,7 @@ import Events from '../../lib/bean'
 import * as KeyUtils from './key-utils'
 import DomUtils from '../util/dom-utils'
 import StringBuffer from '../util/string-buffer'
+// import Utils from '../util/Utils'
 
 const DEFAULTS = {
   stopPropagation: false
@@ -253,8 +254,9 @@ export default class EventDispatcher {
   }
 
   dispatch (event, type, ns, data, pos) {
-    // if (type != 'mouseover' && type != 'mouseout')
-    // Utils.log('EventDispatcher', "dispatch - " + type + '.' + ns + ';' + pos + ';rootTarget=' + event.rootTarget + ';data=' + data);
+    // if (type !== 'mouseover' && type !== 'mouseout') {
+    //   console.log('EventDispatcher', 'dispatch - ' + type + '.' + ns + ';' + pos + ';rootTarget=' + event.rootTarget + ';data=' + data)
+    // }
     if (!this.started) return
     const nsType = ns ? type + '.' + ns : type
     _.forEach(this.listeners, (listeners, key) => {
@@ -297,8 +299,7 @@ export default class EventDispatcher {
     key = KeyUtils.getKeyData(key.ctrl, key.alt, key.shift, key.meta, key.code)
     if (!key.length) return
     key = new StringBuffer(type).append(key).toString('.')
-
-    const listener = { callback: callback, context: context }
+    const listener = { callback, context }
     this.listeners[key] || (this.listeners[key] = [])
     this.listeners[key].push(listener)
   }

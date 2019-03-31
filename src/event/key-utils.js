@@ -34,11 +34,11 @@ export const KEY = {
 }
 
 export function getKeyEvent (event) {
-  if (!event || !(event instanceof KeyboardEvent)) {
+  if (!event) {
     return null
   }
 
-  var key = event.keyCode || event.which
+  let key = event.keyCode || event.which
 
   // Need to find a way to avoid this
   if (key >= 16 && key <= 18) {
