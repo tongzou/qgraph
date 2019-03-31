@@ -1,6 +1,6 @@
 {
   "name": "qgraph",
-  "version": "0.2.25",
+  "version": "0.2.26",
   "description": "A Graph Manipulation and Visualization Library",
   "repository": {
     "type": "git",
