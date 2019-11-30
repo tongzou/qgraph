@@ -242,7 +242,7 @@ class Manhattan extends Link {
 
     Manhattan._mergeSegments(pos)
     if (this.randomNoise && pos.length > 3) {
-      for (let i = 1; i < pos.length - 2; i++) {
+      for (let j = 1; j < 2; j++) {
         let range = this.randomNoise / this.step
         let randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step
 
@@ -270,7 +270,7 @@ class Manhattan extends Link {
           } else {
             randomNumber = Math.sign(this.startNormal.x !== 0 ? this.startNormal.x : this.startNormal.y) * Math.floor(Math.random() * range + 1) * this.step
           }
-          this._moveSegment(pos, 1, randomNumber, 1, 1)
+          this._moveSegment2(pos, 1, randomNumber, 1, 1)
         }
         if (this.randomNoise && pos.length > 4) {
           for (let i = 1; i < pos.length - 2; i++) {
@@ -282,7 +282,7 @@ class Manhattan extends Link {
             } else {
               randomNumber = Math.floor(Math.random() * range * 2 - range + 1) * this.step
             }
-            this._moveSegment(pos, i, randomNumber, 1, 1)
+            this._moveSegment2(pos, i, randomNumber, 1, 1)
           }
         }
       }
@@ -740,6 +740,45 @@ class Manhattan extends Link {
       }
       if (i < pts.length - 2 && pts[i + 1].x === pts[i + 2].x) {
         pts.splice(i + 1, 0, pts[i + 1].clone())
+      }
+      pts[i].x += d
+      pts[i + 1].x += d
+    }
+  }
+
+  /**
+  * Move a line segment by a specified distance.
+  *
+  * @param pts the list of points.
+  * @param i the index of the segment.
+  * @param d the distance to move.
+  * @param startPadding
+  * @param endPadding
+  */
+  _moveSegment2 (pts, i, d, startPadding, endPadding) {
+    if (pts[i].y === pts[i + 1].y) {
+      if (i > 0 && pts[i - 1].y === pts[i].y) {
+        pts.splice(i + 1, 0, pts[i].clone())
+        i++
+      }
+      if (i < pts.length - 2 && pts[i + 1].y === pts[i + 2].y) {
+        pts.splice(i + 1, 0, pts[i + 1].clone())
+      }
+      if ((i > 0 && pts[i].y + d === pts[i - 1].y) || (i < pts.length - 2 && pts[i + 1].y + d === pts[i + 2].y)) {
+        d *= 0.75
+      }
+      pts[i].y += d
+      pts[i + 1].y += d
+    } else {
+      if (i > 0 && pts[i - 1].x === pts[i].x) {
+        pts.splice(i + 1, 0, pts[i].clone())
+        i++
+      }
+      if (i < pts.length - 2 && pts[i + 1].x === pts[i + 2].x) {
+        pts.splice(i + 1, 0, pts[i + 1].clone())
+      }
+      if ((i > 0 && pts[i].x + d === pts[i - 1].x) || (i < pts.length - 2 && pts[i + 1].x + d === pts[i + 2].x)) {
+        d *= 0.75
       }
       pts[i].x += d
       pts[i + 1].x += d
